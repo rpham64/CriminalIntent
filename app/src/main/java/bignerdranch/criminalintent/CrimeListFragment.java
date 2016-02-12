@@ -1,5 +1,6 @@
 package bignerdranch.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -54,13 +54,26 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
 
-        // Set adapter of mCrimeRecyclerView to mAdapter
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        // If mAdapter is null, create a new CrimeAdapter and set to mCrimeRecyclerView's adapter
+        // Else, call notifyDataSetChanged
+        if (mAdapter == null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        }
+        else {
+            mAdapter.notifyDataSetChanged();
+        }
+
     }
 
     // Define CrimeAdapter (Adapter) as an inner class
@@ -128,11 +141,6 @@ public class CrimeListFragment extends Fragment {
         private TextView mDateTextView;     // Date
         private CheckBox mSolvedCheckBox;   // Solved?
 
-/*        // Date Format
-        String format = "EEEE MMM dd, yyyy KK:mm:ss aa";
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);
-        String formattedDate = simpleDateFormat.format(mCrime.getDate());*/
-
         public CrimeHolder(View itemView) {
             super(itemView);
 
@@ -159,16 +167,19 @@ public class CrimeListFragment extends Fragment {
         }
 
         /**
-         * When CrimeHolder is clicked, creates Toast
+         * When CrimeHolder's View is clicked, creates an Intent that starts
+         * an instance of CrimeActivity.
          *
          * @param v
          */
         @Override
         public void onClick(View v) {
 
-            String message = mCrime.getTitle() + " clicked!";
+            // Create an intent using CrimeActivity.newIntent
+            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getID());
 
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            // Call startActivity method on the intent
+            startActivity(intent);
         }
 
     }
