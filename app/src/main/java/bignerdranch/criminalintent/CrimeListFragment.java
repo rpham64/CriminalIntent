@@ -24,6 +24,9 @@ public class CrimeListFragment extends Fragment {
     // Adapter
     private CrimeAdapter mAdapter;
 
+    // Position of Crime in Adapter (for updating View objects)
+    private int mCrimePosition;
+
     /**
      * Pseudocode:
      *
@@ -71,7 +74,8 @@ public class CrimeListFragment extends Fragment {
             mCrimeRecyclerView.setAdapter(mAdapter);
         }
         else {
-            mAdapter.notifyDataSetChanged();
+            // Notify adapter that item changed at mCrimePosition
+            mAdapter.notifyItemChanged(mCrimePosition);
         }
 
     }
@@ -137,6 +141,7 @@ public class CrimeListFragment extends Fragment {
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private Crime mCrime;               // Crime Object
+
         private TextView mTitleTextView;    // Title
         private TextView mDateTextView;     // Date
         private CheckBox mSolvedCheckBox;   // Solved?
@@ -168,15 +173,18 @@ public class CrimeListFragment extends Fragment {
 
         /**
          * When CrimeHolder's View is clicked, creates an Intent that starts
-         * an instance of CrimeActivity.
+         * an instance of CrimePagerActivity.
          *
          * @param v
          */
         @Override
         public void onClick(View v) {
 
-            // Create an intent using CrimeActivity.newIntent
-            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getID());
+            // Store adapter position of Crime
+            mCrimePosition = getAdapterPosition();
+
+            // Create an intent with extra UUID and send to CrimePagerActivity
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getID());
 
             // Call startActivity method on the intent
             startActivity(intent);
