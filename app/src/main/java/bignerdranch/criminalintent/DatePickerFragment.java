@@ -13,7 +13,6 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 /**
  * Created by Rudolf on 2/12/2016.
@@ -28,6 +27,9 @@ public class DatePickerFragment extends DialogFragment {
 
     // DatePicker widget
     private DatePicker mDatePicker;
+
+    // Date
+    private Date mDate;
 
     /**
      * Creates a new instance of DatePickerFragment and
@@ -58,7 +60,7 @@ public class DatePickerFragment extends DialogFragment {
         Date date = (Date) getArguments().getSerializable(ARG_DATE);
 
         // Create a Calendar and set the time to Date
-        Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
 
         // Store year, month, and day as integers
@@ -72,7 +74,21 @@ public class DatePickerFragment extends DialogFragment {
 
         // Set DatePicker's view using the stored year, month, day variables
         mDatePicker = (DatePicker) view.findViewById(R.id.dialog_date_date_picker);
-        mDatePicker.init(year, month, day, null);
+        mDatePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
+            @Override
+            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                // Retrieve original date
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, monthOfYear);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                // Store new calendar date in mDate
+                mDate = calendar.getTime();
+
+                // Store updated mDate in argument
+                getArguments().putSerializable(ARG_DATE, mDate);
+            }
+        });
 
         // Return an instance of AlertDialog with the DatePicker widget
         return new AlertDialog.Builder(getActivity())
@@ -87,11 +103,7 @@ public class DatePickerFragment extends DialogFragment {
                      */
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        int year = mDatePicker.getYear();
-                        int month = mDatePicker.getMonth();
-                        int day = mDatePicker.getDayOfMonth();
-                        Date date = new GregorianCalendar(year, month, day).getTime();
-                        sendResult(Activity.RESULT_OK, date);
+                        sendResult(Activity.RESULT_OK);
                     }
                 })
                 .create();
@@ -102,16 +114,15 @@ public class DatePickerFragment extends DialogFragment {
      * Triggered when user clicks the AlertDialog's PositiveButton
      *
      * @param resultCode
-     * @param date
      */
-    private void sendResult(int resultCode, Date date) {
+    private void sendResult(int resultCode) {
 
         // Check: TargetFragment exists or not
         if (getTargetFragment() == null) return;
 
         // Create a new intent with the date extra
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_DATE, date);
+        intent.putExtra(EXTRA_DATE, mDate);
 
         // Send intent to target fragment using TargetFragment.onActivityResult
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);

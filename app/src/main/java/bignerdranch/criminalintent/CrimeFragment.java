@@ -31,12 +31,19 @@ public class CrimeFragment extends Fragment {
     // Tag for DatePickerFragment
     private static final String DIALOG_DATE = "DialogDate";
 
+    // Tag for TimePickerFragment
+    private static final String DIALOG_TIME = "DialogTime";
+
     // Request code for Date (sent by DatePickerFragment)
     private static final int REQUEST_DATE = 0;
+
+    // Request code for Time (sent by TimePickerFragment)
+    private static final int REQUEST_TIME = 1;
 
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
+    private Button mTimeButton;
     private CheckBox mSolvedCheckBox;
 
     /**
@@ -119,18 +126,29 @@ public class CrimeFragment extends Fragment {
              */
             @Override
             public void onClick(View v) {
+                editDateButton();
+            }
+        });
 
-                // Retrieve FragmentManager
-                FragmentManager fragmentManager = getFragmentManager();
+        // Get reference to mDateButton, set text to date of crime, and disable for now
+        mTimeButton = (Button) view.findViewById(R.id.crime_time);
 
-                // Create a new instance of DatePickerFragment (AlertDialog)
-                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+        // Update DateButton's text
+        updateTime();
 
-                // Set target fragment of DatePickerFragment -> CrimeFragment (for passing data)
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+        // Create listener for mDateButton
+        mTimeButton.setOnClickListener(new View.OnClickListener() {
 
-                // Display the DatePickerFragment instance
-                dialog.show(fragmentManager, DIALOG_DATE);
+            /**
+             * On Time Button click, get hosting activity's FragmentManager, create
+             * new TimePickerFragment instance using newInstance, and show
+             * TimePickerFragment as a dialog
+             *
+             * @param v
+             */
+            @Override
+            public void onClick(View v) {
+                editTimeButton();
             }
         });
 
@@ -167,9 +185,12 @@ public class CrimeFragment extends Fragment {
         if (resultCode != Activity.RESULT_OK) return;
 
         // Check: requestCode is equal to REQUEST_DATE
+        // If so, update Date
+        // Else, if requestCode is equal to REQUEST_TIME
+        // Update time
         if (requestCode == REQUEST_DATE) {
 
-            // If so, retrieve the extra (Date) from the Intent
+            // Retrieve the extra (Date) from the Intent
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
 
             // Set the Crime object's date to this Date
@@ -179,6 +200,54 @@ public class CrimeFragment extends Fragment {
             updateDate();
         }
 
+        else if (requestCode == REQUEST_TIME) {
+
+            // Retrieve the extra (time) from the Intent
+            Date time = (Date) data.getSerializableExtra(TimePickerFragment.EXTRA_TIME);
+
+            // Set the Crime object's time to this time
+            mCrime.setDate(time);
+
+            // Update TimeButton's text
+            updateTime();
+        }
+
+    }
+
+    /**
+     * Helper method for editing Date Button text
+     *
+     */
+    private void editDateButton() {
+        // Retrieve FragmentManager
+        FragmentManager fragmentManager = getFragmentManager();
+
+        // Create a new instance of DatePickerFragment (AlertDialog)
+        DatePickerFragment dialogDate = DatePickerFragment.newInstance(mCrime.getDate());
+
+        // Set target fragment of DatePickerFragment -> CrimeFragment (for passing data)
+        dialogDate.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+
+        // Display the DatePickerFragment instance
+        dialogDate.show(fragmentManager, DIALOG_DATE);
+    }
+
+    /**
+     * Helper method for editing Time Button text
+     *
+     */
+    private void editTimeButton() {
+        // Retrieve FragmentManager
+        FragmentManager fragmentManager = getFragmentManager();
+
+        // Create a new instance of TimePickerFragment (AlertDialog)
+        TimePickerFragment dialogTime = TimePickerFragment.newInstance(mCrime.getDate());
+
+        // Set target fragment of TimePickerFragment -> CrimeFragment (for passing data)
+        dialogTime.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+
+        // Display the TimePickerFragment instance
+        dialogTime.show(fragmentManager, DIALOG_TIME);
     }
 
     /**
@@ -191,17 +260,40 @@ public class CrimeFragment extends Fragment {
     }
 
     /**
+     * Formats Crime's time to a user-friendly format and
+     * sets the DateButton's text to this date
+     */
+    private void updateTime() {
+        String formattedDate = formatTime(mCrime.getDate());
+        mTimeButton.setText(formattedDate);
+    }
+
+
+    /**
      * Convert Date to String using specified format
      *
-     * Ex: "SATURDAY FEB 13, 2016 04:01:19 PM"
+     * Ex: "Wednesday February 13, 2016"
      *
      * @param date
      * @return
      */
     public String formatDate(Date date) {
-        String format = "EEEE MMM dd, yyyy KK:mm:ss aa";
+        String format = "EEEE MMM dd, yyyy";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);
         return simpleDateFormat.format(date);
     }
 
+    /**
+     * Convert time to String using specified format
+     *
+     * Ex: 04:01:19 PM"
+     *
+     * @param time
+     * @return
+     */
+    public String formatTime(Date time) {
+        String format = "KK:mm:ss aa";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);
+        return simpleDateFormat.format(time);
+    }
 }
