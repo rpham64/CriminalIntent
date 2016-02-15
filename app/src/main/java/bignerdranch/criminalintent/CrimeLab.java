@@ -24,15 +24,6 @@ public class CrimeLab {
     // Private constructor given Context parameter
     private CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
-
-        // Populate mCrimes with 100 Crime objects
-        for (int i = 0; i < 100; i++) {
-            Crime crime = new Crime();
-            crime.setTitle("Crime #" + i);
-            crime.setSolved(i % 2 == 0);    // Even => Solved, Odd => Not Solved
-            mCrimes.add(crime);
-        }
-
     }
 
     /**
@@ -50,6 +41,15 @@ public class CrimeLab {
         }
 
         return sCrimeLab;
+    }
+
+    /**
+     * Add crime to list
+     *
+     * @param crime
+     */
+    public void addCrime(Crime crime) {
+        mCrimes.add(crime);
     }
 
     // Getter method for list mCrimes

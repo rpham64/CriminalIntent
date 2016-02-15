@@ -63,7 +63,7 @@ public class DatePickerFragment extends DialogFragment {
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
 
-        // Store year, month, and day as integers
+        // Store current year, month, and day as integers
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
@@ -77,7 +77,8 @@ public class DatePickerFragment extends DialogFragment {
         mDatePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                // Retrieve original date
+
+                // Set calendar date to new date
                 calendar.set(Calendar.YEAR, year);
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);

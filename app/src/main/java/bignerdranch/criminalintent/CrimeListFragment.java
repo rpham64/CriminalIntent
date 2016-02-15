@@ -3,9 +3,13 @@ package bignerdranch.criminalintent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -18,6 +22,9 @@ import java.util.List;
  */
 public class CrimeListFragment extends Fragment {
 
+    // Key for storing mSubtitleVisible in savedInstanceState
+    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
+
     // RecyclerView
     private RecyclerView mCrimeRecyclerView;
 
@@ -26,6 +33,20 @@ public class CrimeListFragment extends Fragment {
 
     // Position of Crime in Adapter (for updating View objects)
     private int mCrimePosition;
+
+    // Checks if the Subtitle is visible
+    private boolean mSubtitleVisible;
+
+    /**
+     * On the creation on CrimeListFragment, implement an options menu
+     *
+     * @param savedInstanceState
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     /**
      * Pseudocode:
@@ -51,6 +72,11 @@ public class CrimeListFragment extends Fragment {
         // Set layout manager for mCrimeRecyclerView
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        // Check: If mSubtitleVisible is saved in savedInstanceState
+        if (savedInstanceState != null) {
+            mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+        }
+
         // Update the user interface
         updateUI();
 
@@ -63,12 +89,119 @@ public class CrimeListFragment extends Fragment {
         updateUI();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
+    }
+
+    /**
+     * Creates Options Menu.
+     *
+     * If subtitles are visible, shows "Hide Subtitles". Else, shows "Show Subtitles".
+     *
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list, menu);
+
+        // Retrieve reference to subtitle item
+        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+
+        // Check: if mSubtitlesVisible is true, set title to "Hide Subtitles".
+        // Else, set title to "Show Subtitles"
+        if (mSubtitleVisible) {
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        } else {
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
+
+    }
+
+    /**
+     * Given a MenuItem, adds a new Crime to CrimeLab and sends the Crime's ID
+     * as an extra in an Intent to CrimePagerActivity.
+     * If not the add crime button, updates the subtitle on the toolbar.
+     * Else, calls superclass' implementation.
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            // Case: MenuItem is the "add crime" menu item
+            case (R.id.menu_item_new_crime):
+
+                // Create a new Crime object
+                Crime crime = new Crime();
+
+                // Add the Crime to CrimeLab
+                CrimeLab.get(getActivity()).addCrime(crime);
+
+                // Create a new intent and store the Crime's ID as an extra
+                // Send the intent to CrimePagerActivity
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getID());
+                startActivity(intent);
+
+                // To indicate no further processing is necessary
+                return true;
+
+            // Case: MenuItem is the "show subtitle" menu item
+            case (R.id.menu_item_show_subtitle):
+
+                // Change status of mSubtitleVisible to alternate between shown and hidden
+                mSubtitleVisible = !mSubtitleVisible;
+
+                getActivity().invalidateOptionsMenu();
+                updateSubtitle();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * Displays the number of Crimes in CrimeListFragment
+     *
+     */
+    private void updateSubtitle() {
+
+        // Retrieve CrimeLab
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+
+        // Retrieve count of Crimes in CrimeLab
+        int crimeCount = crimeLab.getCrimes().size();
+
+        // Create subtitle with String subtitle_format and the crimeCount
+        String subtitle = getString(R.string.subtitle_format, crimeCount);
+
+        // Check: If subtitle is not visible, set subtitle to null
+        if (!mSubtitleVisible) { subtitle = null; }
+
+        // Convert hosting activity into AppCompatActivity instance (for access to toolbar)
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+        // Set subtitle of hosting activity's support action bar
+        activity.getSupportActionBar().setSubtitle(subtitle);
+
+    }
+
+    /**
+     * Updates the User Interface
+     *
+     */
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
         // If mAdapter is null, create a new CrimeAdapter and set to mCrimeRecyclerView's adapter
-        // Else, call notifyDataSetChanged
+        // Else, send notification that an item has changed
         if (mAdapter == null) {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
@@ -78,6 +211,8 @@ public class CrimeListFragment extends Fragment {
             mAdapter.notifyItemChanged(mCrimePosition);
         }
 
+        // Update the Crime count in menu item "Subtitle"
+        updateSubtitle();
     }
 
     // Define CrimeAdapter (Adapter) as an inner class

@@ -40,11 +40,13 @@ public class CrimeFragment extends Fragment {
     // Request code for Time (sent by TimePickerFragment)
     private static final int REQUEST_TIME = 1;
 
-    private Crime mCrime;
-    private EditText mTitleField;
-    private Button mDateButton;
-    private Button mTimeButton;
-    private CheckBox mSolvedCheckBox;
+    private Crime mCrime;                   // Crime
+    private EditText mTitleField;           // Title of Crime
+    private Button mDateButton;             // Date of Crime
+    private Button mTimeButton;             // Time of Crime
+    private CheckBox mSolvedCheckBox;       // Crime solved?
+    private Button mAddButton;              // Add Crime to list
+    private Button mDeleteButton;           // Delete Crime
 
     /**
      * Given a UUID, creates a fragment instance and attaches an arguments bundle
@@ -84,17 +86,18 @@ public class CrimeFragment extends Fragment {
         // Inflates the layout "fragment_crime.xml"
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
-        // Get reference to mTitleField (inflate widget)
+        /** Title Field */
+        // Get reference to Title field (inflate widget)
         mTitleField = (EditText) view.findViewById(R.id.crime_title);
 
         // Set Text to mTitleField
         mTitleField.setText(mCrime.getTitle());
 
-        // Add a listener for mTitleField
+        // Add a listener for Title field
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+                // Nothing here
             }
 
             @Override
@@ -104,17 +107,18 @@ public class CrimeFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-
+                // Nothing here
             }
         });
 
-        // Get reference to mDateButton, set text to date of crime, and disable for now
+        /** Date Button */
+        // Get reference to Date Button
         mDateButton = (Button) view.findViewById(R.id.crime_date);
 
         // Update DateButton's text
         updateDate();
 
-        // Create listener for mDateButton
+        // Create listener for Date Button
         mDateButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -130,13 +134,14 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        // Get reference to mDateButton, set text to date of crime, and disable for now
+        /** Time Button */
+        // Get reference to Time Button
         mTimeButton = (Button) view.findViewById(R.id.crime_time);
 
         // Update DateButton's text
         updateTime();
 
-        // Create listener for mDateButton
+        // Create listener for Time Button
         mTimeButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -152,13 +157,14 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        // Get reference and set listener to CheckBox for updating mSolvedCheckBox
+        /** Solved CheckBox */
+        // Get reference to Solved CheckBox
         mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
 
         // Set Checked status
         mSolvedCheckBox.setChecked(mCrime.isSolved());
 
-        // Add a listener for mSolvedCheckBox
+        // Add a listener for Solved CheckBox
         mSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -166,6 +172,10 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+
+        /** Add Button */
+        // Get reference to Add Button
+        
 
         return view;
     }
