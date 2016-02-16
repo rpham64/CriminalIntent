@@ -52,6 +52,20 @@ public class CrimeLab {
         mCrimes.add(crime);
     }
 
+    /**
+     * Delete crime from list
+     *
+     * @param crime
+     */
+    public void deleteCrime(Crime crime) {
+
+        // Check: list of crimes is empty
+        if (mCrimes.isEmpty()) return;
+
+        // Remove crime from list
+        mCrimes.remove(crime);
+    }
+
     // Getter method for list mCrimes
     public List<Crime> getCrimes() {
         return mCrimes;

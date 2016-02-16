@@ -8,6 +8,9 @@ import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -45,8 +48,6 @@ public class CrimeFragment extends Fragment {
     private Button mDateButton;             // Date of Crime
     private Button mTimeButton;             // Time of Crime
     private CheckBox mSolvedCheckBox;       // Crime solved?
-    private Button mAddButton;              // Add Crime to list
-    private Button mDeleteButton;           // Delete Crime
 
     /**
      * Given a UUID, creates a fragment instance and attaches an arguments bundle
@@ -78,6 +79,9 @@ public class CrimeFragment extends Fragment {
 
         // Fetch the Crime object using the UUID
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeID);
+
+        // Create Options menu (toolbar)
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -173,11 +177,49 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        /** Add Button */
-        // Get reference to Add Button
-        
-
         return view;
+    }
+
+    /**
+     * Creates Toolbar Menu.
+     *
+     * Contains "Delete" action item.
+     *
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    /**
+     * Given a MenuItem, implements modifications to CrimeFragment.
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            // Case: MenuItem is "Delete"
+            case (R.id.menu_item_delete_crime):
+
+                // Remove crime from CrimeLab
+                CrimeLab.get(getActivity()).deleteCrime(mCrime);
+
+                // Close hosting activity
+                getActivity().finish();
+
+                return true;
+
+            default:
+
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 
     /**

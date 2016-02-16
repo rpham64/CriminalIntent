@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -63,7 +65,7 @@ public class CrimeListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        // Inflate the View
+        // Inflate Menu
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
 
         // Call reference to mCrimeRecyclerView
@@ -96,9 +98,9 @@ public class CrimeListFragment extends Fragment {
     }
 
     /**
-     * Creates Options Menu.
+     * Creates Toolbar Menu.
      *
-     * If subtitles are visible, shows "Hide Subtitles". Else, shows "Show Subtitles".
+     * Contains "Show Subtitle", "Hide Subtitle" action items.
      *
      * @param menu
      * @param inflater
@@ -178,8 +180,9 @@ public class CrimeListFragment extends Fragment {
         // Retrieve count of Crimes in CrimeLab
         int crimeCount = crimeLab.getCrimes().size();
 
-        // Create subtitle with String subtitle_format and the crimeCount
-        String subtitle = getString(R.string.subtitle_format, crimeCount);
+        // Create subtitle with String subtitle_plural and the crimeCount
+        String subtitle = getResources()
+                .getQuantityString(R.plurals.subtitle_plural, crimeCount, crimeCount);
 
         // Check: If subtitle is not visible, set subtitle to null
         if (!mSubtitleVisible) { subtitle = null; }
@@ -200,6 +203,23 @@ public class CrimeListFragment extends Fragment {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
+        // If list is empty, create a message that says "No crimes here! Click the
+        // "+" button above to add a new crime."
+        if (crimes.size() == 0) {
+
+            // Create toast
+            Toast toast = Toast.makeText(getActivity(), R.string.crime_list_empty, Toast.LENGTH_LONG);
+
+            // Align text in Toast to center
+            TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
+            if (textView != null) {
+                textView.setGravity(Gravity.CENTER);
+            }
+
+            // Display toast message
+            toast.show();
+        }
+
         // If mAdapter is null, create a new CrimeAdapter and set to mCrimeRecyclerView's adapter
         // Else, send notification that an item has changed
         if (mAdapter == null) {
@@ -208,7 +228,10 @@ public class CrimeListFragment extends Fragment {
         }
         else {
             // Notify adapter that item changed at mCrimePosition
-            mAdapter.notifyItemChanged(mCrimePosition);
+//            mAdapter.notifyItemChanged(mCrimePosition);
+
+            // Fixes ArrayOutOfIndexException for deleting crimes (Challenge: Deleting Crimes)
+            mAdapter.notifyDataSetChanged();
         }
 
         // Update the Crime count in menu item "Subtitle"
