@@ -2,11 +2,16 @@ package bignerdranch.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +22,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,11 +50,16 @@ public class CrimeFragment extends Fragment {
     // Request code for Time (sent by TimePickerFragment)
     private static final int REQUEST_TIME = 1;
 
+    // Request code for Contact
+    private static final int REQUEST_CONTACT = 2;
+
     private Crime mCrime;                   // Crime
     private EditText mTitleField;           // Title of Crime
     private Button mDateButton;             // Date of Crime
     private Button mTimeButton;             // Time of Crime
     private CheckBox mSolvedCheckBox;       // Crime solved?
+    private Button mSuspectButton;          // Suspect name
+    private Button mReportButton;           // Send Crime report
 
     /**
      * Given a UUID, creates a fragment instance and attaches an arguments bundle
@@ -82,6 +94,14 @@ public class CrimeFragment extends Fragment {
 
         // Create Options menu (toolbar)
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Updates CrimeLab's copy of mCrime
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
 
     @Override
@@ -177,7 +197,115 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        /** Suspect Button */
+        // Create Implicit Intent with action PICK and location Content URI
+        final Intent pickContact = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+
+        // Get reference to Suspect Button
+        mSuspectButton = (Button) view.findViewById(R.id.crime_suspect);
+
+        // Create listener for Suspect Button
+        mSuspectButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Calls Implicit intent on second activity and retrieves the result
+             *
+             * @param v
+             */
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(pickContact, REQUEST_CONTACT);
+            }
+        });
+
+        // Set text of Suspect Button to suspect, if it exists
+        if (mCrime.getSuspect() != null) {
+            mSuspectButton.setText(mCrime.getSuspect());
+        }
+
+        // Check: No contacts app => Disable Suspect Button
+        PackageManager packageManager = getActivity().getPackageManager();
+
+        if (packageManager.resolveActivity(pickContact,
+                packageManager.MATCH_DEFAULT_ONLY) == null) {
+            mSuspectButton.setEnabled(false);
+        }
+
+        /** Report Button */
+        // Get reference to Report Button
+        mReportButton = (Button) view.findViewById(R.id.crime_report);
+
+        // Create listener for Report Button
+        mReportButton.setOnClickListener(new View.OnClickListener() {
+
+            /**
+             * Creates and Sends Implicit Intent
+             *
+             * @param v
+             */
+            @Override
+            public void onClick(View v) {
+
+                // Create intent with action
+                Intent intent = new Intent(Intent.ACTION_SEND);
+
+                // Set type of data for action
+                intent.setType("text/plain");
+
+                // Include Extras, if they exist
+                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_suspect));
+
+                // Create a chooser to display activities responding to the implicit intent
+                intent = Intent.createChooser(intent, getString(R.string.send_report));
+
+                // Send the intent to the OS
+                startActivity(intent);
+            }
+        });
+
         return view;
+    }
+
+    /**
+     * Creates four strings and pieces them together, then returns a complete report
+     *
+     * 1) solvedString - Displays whether mCrime is solved or not
+     * 2) dateString - Displays date of mCrime
+     * 3) suspect - Displays whether there is a suspect or not
+     * 4) report - Completed report
+     *
+     * @return
+     */
+    private String getCrimeReport() {
+
+        /** solvedString */
+        String solvedString = null;
+
+        if (mCrime.isSolved()) {
+            solvedString = getString(R.string.crime_report_solved);
+        } else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+
+        /** dateString */
+        String dateString = formatDate(mCrime.getDate());
+
+        /** suspect */
+        String suspect = mCrime.getSuspect();
+
+        if (suspect == null) {
+            suspect = getString(R.string.crime_report_no_suspect);
+        } else {
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+
+        /** report */
+        String report = getString(R.string.crime_report, mCrime.getTitle(),
+                dateString, solvedString, suspect);
+
+        return report;
     }
 
     /**
@@ -210,6 +338,16 @@ public class CrimeFragment extends Fragment {
                 // Remove crime from CrimeLab
                 CrimeLab.get(getActivity()).deleteCrime(mCrime);
 
+                // Display toast with message "Crime deleted."
+                Toast toast = Toast.makeText(getActivity(), R.string.toast_crime_deleted, Toast.LENGTH_SHORT);
+
+                TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
+                if (textView != null) {
+                    textView.setGravity(Gravity.CENTER);
+                }
+
+                toast.show();
+
                 // Close hosting activity
                 getActivity().finish();
 
@@ -236,10 +374,8 @@ public class CrimeFragment extends Fragment {
         // Check: resultCode is OK or not
         if (resultCode != Activity.RESULT_OK) return;
 
-        // Check: requestCode is equal to REQUEST_DATE
+        // Check: requestCode is REQUEST_DATE
         // If so, update Date
-        // Else, if requestCode is equal to REQUEST_TIME
-        // Update time
         if (requestCode == REQUEST_DATE) {
 
             // Retrieve the extra (Date) from the Intent
@@ -252,6 +388,8 @@ public class CrimeFragment extends Fragment {
             updateDate();
         }
 
+        // Check: requestCode is REQUEST_TIME
+        // If so, update Time
         else if (requestCode == REQUEST_TIME) {
 
             // Retrieve the extra (time) from the Intent
@@ -262,6 +400,37 @@ public class CrimeFragment extends Fragment {
 
             // Update TimeButton's text
             updateTime();
+        }
+
+        // Check: requestCode is REQUEST_CONTACT and data is not null
+        else if (requestCode == REQUEST_CONTACT && data != null) {
+
+            // Locator pointing to the contact picked by the user
+            Uri contactUri = data.getData();
+
+            // Specify fields that query should return values for
+            String[] queryFields = new String[] {ContactsContract.Contacts.DISPLAY_NAME};
+
+            // Perform query using contactUri as "whereClause"
+            Cursor cursor = getActivity().getContentResolver()
+                    .query(contactUri, queryFields, null, null, null);
+
+            try {
+
+                // Check: results not null
+                if (cursor.getCount() == 0) return;
+
+                // Pull out data from first row, first column
+                // This is the suspect's name
+                cursor.moveToFirst();
+                String suspect = cursor.getString(0);
+                mCrime.setSuspect(suspect);
+                mSuspectButton.setText(suspect);
+
+            } finally {
+                cursor.close();                 // To avoid Cursor exceptions
+            }
+
         }
 
     }
@@ -348,4 +517,5 @@ public class CrimeFragment extends Fragment {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);
         return simpleDateFormat.format(time);
     }
+
 }

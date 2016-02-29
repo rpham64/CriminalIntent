@@ -1,10 +1,17 @@
 package bignerdranch.criminalintent;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import bignerdranch.criminalintent.database.CrimeBaseHelper;
+import bignerdranch.criminalintent.database.CrimeCursorWrapper;
+import bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
 
 /**
  * Singleton to hold Crime data
@@ -18,12 +25,16 @@ public class CrimeLab {
     // Singleton to hold Crime data
     private static CrimeLab sCrimeLab;
 
-    // List of Crimes
-    private List<Crime> mCrimes;
+    // Context
+    private Context mContext;
+
+    // SQLite Database
+    private SQLiteDatabase mDatabase;
 
     // Private constructor given Context parameter
     private CrimeLab(Context context) {
-        mCrimes = new ArrayList<>();
+        mContext = context.getApplicationContext();
+        mDatabase = new CrimeBaseHelper(mContext).getWritableDatabase();
     }
 
     /**
@@ -44,12 +55,18 @@ public class CrimeLab {
     }
 
     /**
-     * Add crime to list
+     * Add Crime to database
      *
      * @param crime
      */
-    public void addCrime(Crime crime) {
-        mCrimes.add(crime);
+    public void addCrime(Crime crime){
+
+        // Get ContentValues
+        ContentValues contentValues = getContentValues(crime);
+
+        // Insert crimes's contentValues into database
+        mDatabase.insert(CrimeTable.NAME, null, contentValues);
+
     }
 
     /**
@@ -59,32 +76,134 @@ public class CrimeLab {
      */
     public void deleteCrime(Crime crime) {
 
-        // Check: list of crimes is empty
-        if (mCrimes.isEmpty()) return;
+        // Get ContentValues
+        ContentValues contentValues = getContentValues(crime);
 
-        // Remove crime from list
-        mCrimes.remove(crime);
+        // Get Crime UUID
+        String uuidString = crime.getID().toString();
+
+        // Delete crime's contentValues from database
+        mDatabase.delete(CrimeTable.NAME, CrimeTable.Cols.UUID + " = ?",
+                new String[] {uuidString});
     }
 
-    // Getter method for list mCrimes
-    public List<Crime> getCrimes() {
-        return mCrimes;
+
+    /**
+     * Returns list of Crimes using database
+     *
+     * @return
+     */
+    public List<Crime> getCrimes(){
+
+        // List of crimes (to return)
+        List<Crime> crimes = new ArrayList<>();
+
+        // Cursor
+        CrimeCursorWrapper crimeCursorWrapper = queryCrimes(null, null);
+
+        // Walk the Cursor algorithm
+        try {
+
+            // Start at the first row data
+            crimeCursorWrapper.moveToFirst();
+
+            // Traverse the database, Extract Crime from CrimeCursorWrapper, and
+            // Add to crimes list
+            while (!crimeCursorWrapper.isAfterLast()) {
+                crimes.add(crimeCursorWrapper.getCrime());
+                crimeCursorWrapper.moveToNext();    // Next row data
+            }
+        } finally {
+            crimeCursorWrapper.close();             // To avoid cursor exceptions
+        }
+
+        return crimes;
     }
 
     /**
-     * Returns Crime with the given ID
+     * Returns first row Crime data from the database, if it exists
      *
      * @return
      */
     public Crime getCrime(UUID id) {
 
-        // For all Crimes in mCrimes
-        // If current crime's id equals the given id, return the crime
-        // Return null if not found
-        for (Crime crime : mCrimes) {
-            if (crime.getID().equals(id)) { return crime; }
+        // Cursor for UUID row data
+        CrimeCursorWrapper crimeCursorWrapper = queryCrimes(
+                CrimeTable.Cols.UUID + " = ?",
+                new String[] { id.toString() }
+        );
+
+        // Return first row Crime data, if it exists
+        try {
+            if (crimeCursorWrapper.getCount() == 0) return null;
+
+            crimeCursorWrapper.moveToFirst();
+
+            return crimeCursorWrapper.getCrime();
+
+        } finally {
+            crimeCursorWrapper.close();             // To avoid cursor exceptions
         }
 
-        return null;
     }
+
+    /**
+     * Updates Crime in database
+     *
+     * @param crime
+     */
+    public void updateCrime(Crime crime) {
+
+        // Crime UUID
+        String uuidString = crime.getID().toString();
+
+        // ContentValues of crime
+        ContentValues contentValues = getContentValues(crime);
+
+        // Update database entry for crime
+        mDatabase.update(CrimeTable.NAME, contentValues,
+                CrimeTable.Cols.UUID + " = ?", new String[]{ uuidString });
+
+    }
+
+    /**
+     * Returns ContentValues for given Crime
+     *
+     * @param crime
+     * @return
+     */
+    private static ContentValues getContentValues(Crime crime) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CrimeTable.Cols.UUID, crime.getID().toString());
+        contentValues.put(CrimeTable.Cols.TITLE, crime.getTitle());
+        contentValues.put(CrimeTable.Cols.DATE, crime.getDate().getTime());
+        contentValues.put(CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+        contentValues.put(CrimeTable.Cols.SUSPECT, crime.getSuspect());
+
+        return contentValues;
+    }
+
+    /**
+     * Database Query for Crimes - Reading in data from SQLite
+     *
+     * @param whereClause
+     * @param whereArgs
+     * @return
+     */
+    private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs) {
+
+        // Query method
+        Cursor cursor = mDatabase.query(
+                CrimeTable.NAME,
+                null,               // null selects all columns
+                whereClause,
+                whereArgs,
+                null,               // groupBy
+                null,               // having
+                null                // orderBy
+        );
+
+        return new CrimeCursorWrapper(cursor);
+    }
+
 }

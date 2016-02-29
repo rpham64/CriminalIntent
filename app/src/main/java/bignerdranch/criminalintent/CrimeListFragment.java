@@ -208,7 +208,7 @@ public class CrimeListFragment extends Fragment {
         if (crimes.size() == 0) {
 
             // Create toast
-            Toast toast = Toast.makeText(getActivity(), R.string.crime_list_empty, Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getActivity(), R.string.toast_crime_list_empty, Toast.LENGTH_SHORT);
 
             // Align text in Toast to center
             TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
@@ -227,8 +227,8 @@ public class CrimeListFragment extends Fragment {
             mCrimeRecyclerView.setAdapter(mAdapter);
         }
         else {
-            // Notify adapter that item changed at mCrimePosition
-//            mAdapter.notifyItemChanged(mCrimePosition);
+            // Update CrimeAdapter with new Crimes list from CrimeLab
+            mAdapter.setCrimes(crimes);
 
             // Fixes ArrayOutOfIndexException for deleting crimes (Challenge: Deleting Crimes)
             mAdapter.notifyDataSetChanged();
@@ -283,9 +283,23 @@ public class CrimeListFragment extends Fragment {
             crimeHolder.bindCrime(crime);
         }
 
+        /**
+         * Returns number of Crimes in mCrimes list
+         *
+         * @return
+         */
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        /**
+         * Sets up list of crimes
+         *
+         * @param crimes
+         */
+        public void setCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
         }
 
     }

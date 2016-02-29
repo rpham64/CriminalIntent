@@ -83,13 +83,14 @@ public class DatePickerFragment extends DialogFragment {
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                // Store new calendar date in mDate
-                mDate = calendar.getTime();
-
-                // Store updated mDate in argument
-                getArguments().putSerializable(ARG_DATE, mDate);
             }
         });
+
+        // Store new calendar date in mDate
+        mDate = calendar.getTime();
+
+        // Store updated mDate in argument
+        getArguments().putSerializable(ARG_DATE, mDate);
 
         // Return an instance of AlertDialog with the DatePicker widget
         return new AlertDialog.Builder(getActivity())
