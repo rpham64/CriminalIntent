@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
 
 /**
+ * Crime Database
+ *
  * Created by Rudolf on 2/25/2016.
  */
 public class CrimeBaseHelper extends SQLiteOpenHelper {
@@ -40,7 +42,7 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
                 CrimeTable.Cols.DATE + ", " +
                 CrimeTable.Cols.SOLVED + ", " +
                 CrimeTable.Cols.SUSPECT +
-                ")"
+                        ")"
         );
 
     }

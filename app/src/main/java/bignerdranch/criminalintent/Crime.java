@@ -8,11 +8,11 @@ import java.util.UUID;
  */
 public class Crime {
 
-    private UUID mID;           // Unique crime ID
-    private String mTitle;      // Crime Title
-    private Date mDate;         // Date of Crime
-    private boolean mSolved;    // Crime solved or not
-    private String mSuspect;    // Name of suspect
+    private UUID mID;                   // Unique crime ID
+    private String mTitle;              // Crime Title
+    private Date mDate;                 // Date of Crime
+    private boolean mSolved;            // Crime solved or not
+    private String mSuspect;            // Name of suspect
 
     /**
      * Construct Crime with random UUID
