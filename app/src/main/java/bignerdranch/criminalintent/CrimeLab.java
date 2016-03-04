@@ -76,9 +76,6 @@ public class CrimeLab {
      */
     public void deleteCrime(Crime crime) {
 
-        // Get ContentValues
-        ContentValues contentValues = getContentValues(crime);
-
         // Get Crime UUID
         String uuidString = crime.getID().toString();
 

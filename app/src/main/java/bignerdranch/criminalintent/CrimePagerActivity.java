@@ -22,11 +22,16 @@ public class CrimePagerActivity extends AppCompatActivity {
     // Key for Crime ID (Extra)
     private static final String EXTRA_CRIME_ID = "com.bignerdranch.android.criminalintent.crime_id";
 
+    // KEY for CrimeFragment
+    private static final String KEY_CRIME_FRAGMENT = "crime fragment";
+
     // ViewPager
     private ViewPager mViewPager;
 
     // List of Crimes
     private List<Crime> mCrimes;
+
+    Fragment crimeFragment;
 
     /**
      * Create new Intent with Extra

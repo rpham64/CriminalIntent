@@ -2,6 +2,7 @@ package bignerdranch.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -39,6 +40,12 @@ public class CrimeFragment extends Fragment {
 
     // TAG for CrimeFragment
     private static final String TAG = "CrimeFragment";
+
+    // KEY for contactID
+    private static final String KEY_ID = "id";
+
+    // KEY for contactNumber
+    private static final String KEY_NUMBER = "number";
 
     // Fragment argument for crime_id
     private static final String ARG_CRIME_ID = "crime_id";
@@ -94,9 +101,45 @@ public class CrimeFragment extends Fragment {
         return fragment;
     }
 
+    /**
+     * Saves fragment state when fragment is destroyed
+     *
+     * @param key
+     * @param contactNumber
+     */
+    public void savePreferences(String key, String contactNumber) {
+        SharedPreferences sharedPreferences = getActivity().getPreferences(0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(KEY_NUMBER, contactNumber);
+        editor.commit();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        Log.d(TAG, "On savedInstanceState");
+
+        savedInstanceState.putString(KEY_NUMBER, contactNumber);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Log.d(TAG, "Is savedInstanceState null?");
+
+        if (savedInstanceState != null) {
+            contactNumber = savedInstanceState.getString(KEY_NUMBER);
+            Log.d(TAG, "savedInstanceState is NOT NULL");
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "On Create");
 
         // Retrieve the UUID from fragment arguments
         UUID crimeID = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
@@ -109,20 +152,79 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        Log.d(TAG, "On Start");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.d(TAG, "On Resume");
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+
+        Log.d(TAG, "On Pause");
 
         // Updates CrimeLab's copy of mCrime
         CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public void onStop() {
+        super.onStop();
+
+        Log.d(TAG, "On Stop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.d(TAG, "On Destroy");
+    }
+
+    /**
+     * Instantiates View for CrimeFragment fragment
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
+
+        if (savedInstanceState != null) {
+            contactID = savedInstanceState.getString(KEY_ID);
+            contactNumber = savedInstanceState.getString(KEY_NUMBER);
+        }
+
+        Log.d(TAG, "On CreateView");
+        Log.d(TAG, "Contact ID: " + contactID);
+        Log.d(TAG, "Contact Number: " + contactNumber);
 
         // Inflates the layout "fragment_crime.xml"
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
-        /** Title Field */
+        createTitleField(view);                         // Title Field
+        createAndUpdateDateButton(view);                // Date Button
+        createAndUpdateTimeButton(view);                // Time Button
+        createAndUpdateSolvedCheckbox(view);            // Solved Checkbox
+        createSuspectButton(view);                      // Suspect Button
+        createCallSuspectButton(view);                  // Call Suspect Button
+        createReportButton(view);                       // Report Button
+
+        return view;
+    }
+
+    private void createTitleField(View view) {
+
         // Get reference to Title field (inflate widget)
         mTitleField = (EditText) view.findViewById(R.id.crime_title);
 
@@ -146,8 +248,10 @@ public class CrimeFragment extends Fragment {
                 // Nothing here
             }
         });
+    }
 
-        /** Date Button */
+    private void createAndUpdateDateButton(View view) {
+
         // Get reference to Date Button
         mDateButton = (Button) view.findViewById(R.id.crime_date);
 
@@ -169,8 +273,10 @@ public class CrimeFragment extends Fragment {
                 editDateButton();
             }
         });
+    }
 
-        /** Time Button */
+    private void createAndUpdateTimeButton(View view) {
+
         // Get reference to Time Button
         mTimeButton = (Button) view.findViewById(R.id.crime_time);
 
@@ -192,8 +298,10 @@ public class CrimeFragment extends Fragment {
                 editTimeButton();
             }
         });
+    }
 
-        /** Solved CheckBox */
+    private void createAndUpdateSolvedCheckbox(View view) {
+
         // Get reference to Solved CheckBox
         mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
 
@@ -208,8 +316,10 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+    }
 
-        /** Suspect Button */
+    private void createSuspectButton(View view) {
+
         // Create Implicit Intent with action PICK and location Content URI
         final Intent pickContact = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
@@ -243,8 +353,10 @@ public class CrimeFragment extends Fragment {
                 packageManager.MATCH_DEFAULT_ONLY) == null) {
             mSuspectButton.setEnabled(false);
         }
+    }
 
-        /** Call Suspect Button */
+    private void createCallSuspectButton(View view) {
+
         // Get reference to Call Suspect Button
         mCallSuspectButton = (Button) view.findViewById(R.id.crime_call_suspect);
 
@@ -259,6 +371,10 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                SharedPreferences sharedPreferences = getActivity().getPreferences(0);
+                contactNumber = sharedPreferences.getString(KEY_NUMBER, null);
+
+                // Dial contact number using phone app
                 String uri = "tel:" + contactNumber.trim();
                 Uri number = Uri.parse(uri);
                 Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
@@ -266,8 +382,10 @@ public class CrimeFragment extends Fragment {
                 startActivity(callNumber);
             }
         });
+    }
 
-        /** Report Button */
+    private void createReportButton(View view) {
+
         // Get reference to Report Button
         mReportButton = (Button) view.findViewById(R.id.crime_report);
 
@@ -299,8 +417,6 @@ public class CrimeFragment extends Fragment {
 
             }
         });
-
-        return view;
     }
 
     /**
@@ -537,8 +653,62 @@ public class CrimeFragment extends Fragment {
             cursorPhone.close();
         }
 
+        savePreferences(KEY_NUMBER, contactNumber);
+
         Log.d(TAG, "Contact Phone Number: " + contactNumber);
 
+    }
+/*
+    *//**
+     * Given contact name, returns his phone number as a string.
+     *
+     * @param name
+     * @return
+     *//*
+    private String getPhoneNumber(String name) {
+
+        String number = null;
+        Uri contentUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        String[] projection = new String[] {ContactsContract.CommonDataKinds.Phone.NUMBER};
+        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " + name;
+        Cursor cursor = getActivity().getContentResolver().query(
+                contentUri, projection, selection, null, null
+        );
+
+        try {
+
+            if (cursor.moveToFirst()) {
+                number = cursor.getString(0);
+            }
+
+        } finally {
+            cursor.close();
+        }
+
+        // Check: Number is null
+        if (number == null) {
+            number = "Unsaved";
+        }
+
+        return number;
+    }*/
+
+    /**
+     * Formats Crime's date to a user-friendly format and
+     * sets the DateButton's text to this date
+     */
+    private void updateDate() {
+        String formattedDate = formatDate(mCrime.getDate());
+        mDateButton.setText(formattedDate);
+    }
+
+    /**
+     * Formats Crime's time to a user-friendly format and
+     * sets the DateButton's text to this date
+     */
+    private void updateTime() {
+        String formattedDate = formatTime(mCrime.getDate());
+        mTimeButton.setText(formattedDate);
     }
 
     /**
@@ -576,25 +746,6 @@ public class CrimeFragment extends Fragment {
         // Display the TimePickerFragment instance
         dialogTime.show(fragmentManager, DIALOG_TIME);
     }
-
-    /**
-     * Formats Crime's date to a user-friendly format and
-     * sets the DateButton's text to this date
-     */
-    private void updateDate() {
-        String formattedDate = formatDate(mCrime.getDate());
-        mDateButton.setText(formattedDate);
-    }
-
-    /**
-     * Formats Crime's time to a user-friendly format and
-     * sets the DateButton's text to this date
-     */
-    private void updateTime() {
-        String formattedDate = formatTime(mCrime.getDate());
-        mTimeButton.setText(formattedDate);
-    }
-
 
     /**
      * Convert Date to String using specified format

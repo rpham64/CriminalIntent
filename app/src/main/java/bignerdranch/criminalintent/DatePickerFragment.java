@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -18,6 +19,9 @@ import java.util.Date;
  * Created by Rudolf on 2/12/2016.
  */
 public class DatePickerFragment extends DialogFragment {
+
+    // TAG for DatePickerFragment
+    private static final String TAG = "DatePickerFragment";
 
     // Fragment argument for Date
     private static final String ARG_DATE = "date";
@@ -63,9 +67,11 @@ public class DatePickerFragment extends DialogFragment {
         final Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
 
+        Log.d(TAG, "Current Date: " + date);
+
         // Store current year, month, and day as integers
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        final int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
         // Inflate DatePicker view
@@ -83,11 +89,21 @@ public class DatePickerFragment extends DialogFragment {
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
+                Log.d(TAG, "Year :" + year);
+                Log.d(TAG, "Month :" + month);
+                Log.d(TAG, "Day :" + dayOfMonth);
+
+                mDate = calendar.getTime();
+
+                Log.d(TAG, "New Date: " + mDate);
             }
         });
 
-        // Store new calendar date in mDate
+        // Stores default calendar date in mDate
+        // Fixes bug of opening dialog and not choosing a new date
         mDate = calendar.getTime();
+
+        Log.d(TAG, "New date: " + mDate);
 
         // Store updated mDate in argument
         getArguments().putSerializable(ARG_DATE, mDate);
