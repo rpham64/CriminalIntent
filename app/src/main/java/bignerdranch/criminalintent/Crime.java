@@ -13,6 +13,8 @@ public class Crime {
     private Date mDate;                 // Date of Crime
     private boolean mSolved;            // Crime solved or not
     private String mSuspect;            // Name of suspect
+
+
     /**
      * Construct Crime with random UUID
      */
@@ -69,6 +71,17 @@ public class Crime {
 
     public void setSuspect(String suspect) {
         mSuspect = suspect;
+    }
+
+    /**
+     * Retrieves photo filename.
+     *
+     * Filename is unique due to Crime's ID.
+     *
+     * @return
+     */
+    public String getPhotoFilename() {
+        return "IMG_" + getID().toString() + ".jpg";
     }
 
 }

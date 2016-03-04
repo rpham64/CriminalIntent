@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
@@ -25,9 +27,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -65,6 +70,9 @@ public class CrimeFragment extends Fragment {
     // Request code for Contact
     private static final int REQUEST_CONTACT = 2;
 
+    // Request code for Photo
+    private static final int REQUEST_PHOTO = 3;
+
     // Unique Contact ID
     private String contactID;
 
@@ -72,7 +80,10 @@ public class CrimeFragment extends Fragment {
     private String contactNumber;
 
     private Crime mCrime;                   // Crime
+    private File mPhotoFile;                // Photo File Location
     private EditText mTitleField;           // Title of Crime
+    private ImageView mPhotoView;           // Photo of Crime
+    private ImageButton mPhotoButton;       // Take Picture of Crime
     private Button mDateButton;             // Date of Crime
     private Button mTimeButton;             // Time of Crime
     private CheckBox mSolvedCheckBox;       // Crime solved?
@@ -147,6 +158,9 @@ public class CrimeFragment extends Fragment {
         // Fetch the Crime object using the UUID
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeID);
 
+        // Fetch location for pictures from CrimeLab
+        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
+
         // Create Options menu (toolbar)
         setHasOptionsMenu(true);
     }
@@ -212,12 +226,21 @@ public class CrimeFragment extends Fragment {
         // Inflates the layout "fragment_crime.xml"
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
+        // For checking if an app is unavailable
+        PackageManager packageManager = getActivity().getPackageManager();
+
+        // Get reference to photo view
+        mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
+
+        createOrUpdatePhotoView();                      // Photo View
+        createPhotoButton(view, packageManager);        // Photo Button
+
         createTitleField(view);                         // Title Field
-        createAndUpdateDateButton(view);                // Date Button
-        createAndUpdateTimeButton(view);                // Time Button
-        createAndUpdateSolvedCheckbox(view);            // Solved Checkbox
-        createSuspectButton(view);                      // Suspect Button
-        createCallSuspectButton(view);                  // Call Suspect Button
+        createDateButton(view);                         // Date Button
+        createTimeButton(view);                         // Time Button
+        createSolvedCheckbox(view);                     // Solved Checkbox
+        createSuspectButton(view, packageManager);      // Suspect Button
+        createCallButton(view);                         // Call Suspect Button
         createReportButton(view);                       // Report Button
 
         return view;
@@ -228,7 +251,7 @@ public class CrimeFragment extends Fragment {
         // Get reference to Title field (inflate widget)
         mTitleField = (EditText) view.findViewById(R.id.crime_title);
 
-        // Set Text to mTitleField
+        // Set field's title to Crime's title
         mTitleField.setText(mCrime.getTitle());
 
         // Add a listener for Title field
@@ -250,7 +273,57 @@ public class CrimeFragment extends Fragment {
         });
     }
 
-    private void createAndUpdateDateButton(View view) {
+    private void createOrUpdatePhotoView() {
+
+        // Check: mPhotoFile is null
+        // If so, set mPhotoView's drawable to null
+        // Else, Create a scaled bitmap and set it to mPhotoView
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+
+            mPhotoView.setImageDrawable(null);
+
+        } else {
+
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+
+            mPhotoView.setImageBitmap(bitmap);
+
+        }
+
+    }
+
+    private void createPhotoButton(View view, PackageManager packageManager) {
+        // Get reference to camera button
+        mPhotoButton = (ImageButton) view.findViewById(R.id.crime_camera);
+
+        // Create an intent with action ACTION_IMAGE_CAPTURE
+        // This implicit intent takes a thumbnail-sized picture using the camera app
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // Check: A camera app exists AND mPhotoFile is not null
+        boolean canTakePhoto = mPhotoFile != null &&
+                captureImage.resolveActivity(packageManager) != null;
+
+        // Disable camera button if canTakePhoto is false. Else, set enabled.
+        mPhotoButton.setEnabled(canTakePhoto);
+
+        // If canTakePhoto is true, read in the Uri from mPhotoFile and
+        // Add an extra to captureImage with MediaStore.EXTRA_OUTPUT
+        if (canTakePhoto) {
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        // Create listener for mPhotoButton
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(captureImage, REQUEST_PHOTO);
+            }
+        });
+    }
+
+    private void createDateButton(View view) {
 
         // Get reference to Date Button
         mDateButton = (Button) view.findViewById(R.id.crime_date);
@@ -275,7 +348,7 @@ public class CrimeFragment extends Fragment {
         });
     }
 
-    private void createAndUpdateTimeButton(View view) {
+    private void createTimeButton(View view) {
 
         // Get reference to Time Button
         mTimeButton = (Button) view.findViewById(R.id.crime_time);
@@ -300,7 +373,7 @@ public class CrimeFragment extends Fragment {
         });
     }
 
-    private void createAndUpdateSolvedCheckbox(View view) {
+    private void createSolvedCheckbox(View view) {
 
         // Get reference to Solved CheckBox
         mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
@@ -318,16 +391,14 @@ public class CrimeFragment extends Fragment {
         });
     }
 
-    private void createSuspectButton(View view) {
+    private void createSuspectButton(View view, PackageManager packageManager) {
 
         // Create Implicit Intent with action PICK and location Content URI
         final Intent pickContact = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
 
-        // Get reference to Suspect Button
+        // Get reference to Suspect Button and create its listener
         mSuspectButton = (Button) view.findViewById(R.id.crime_suspect);
-
-        // Create listener for Suspect Button
         mSuspectButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -346,21 +417,17 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
-        // Check: No contacts app => Disable Suspect Button
-        PackageManager packageManager = getActivity().getPackageManager();
-
+        // If no contact app exists, disable Suspect button
         if (packageManager.resolveActivity(pickContact,
                 packageManager.MATCH_DEFAULT_ONLY) == null) {
             mSuspectButton.setEnabled(false);
         }
     }
 
-    private void createCallSuspectButton(View view) {
+    private void createCallButton(View view) {
 
-        // Get reference to Call Suspect Button
+        // Get reference to Call Button and create its listener
         mCallSuspectButton = (Button) view.findViewById(R.id.crime_call_suspect);
-
-        // Create listener for Call Suspect Button
         mCallSuspectButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -371,6 +438,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
+                // Retrieve contact number from sharedPreferences
                 SharedPreferences sharedPreferences = getActivity().getPreferences(0);
                 contactNumber = sharedPreferences.getString(KEY_NUMBER, null);
 
@@ -386,10 +454,8 @@ public class CrimeFragment extends Fragment {
 
     private void createReportButton(View view) {
 
-        // Get reference to Report Button
+        // Get reference to Report Button and create its listener
         mReportButton = (Button) view.findViewById(R.id.crime_report);
-
-        // Create listener for Report Button
         mReportButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -569,6 +635,10 @@ public class CrimeFragment extends Fragment {
                 retrieveContactNumber(contactUri);
 
                 break;
+
+            case (REQUEST_PHOTO):
+
+                createOrUpdatePhotoView();
 
         }
 
@@ -764,13 +834,13 @@ public class CrimeFragment extends Fragment {
     /**
      * Convert time to String using specified format
      *
-     * Ex: 04:01:19 PM"
+     * Ex: "04:01 PM"
      *
      * @param time
      * @return
      */
     public String formatTime(Date time) {
-        String format = "KK:mm:ss aa";
+        String format = "hh:mm aa";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.US);
         return simpleDateFormat.format(time);
     }

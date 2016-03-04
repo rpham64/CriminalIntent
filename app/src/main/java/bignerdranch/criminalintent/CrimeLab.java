@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -81,7 +83,7 @@ public class CrimeLab {
 
         // Delete crime's contentValues from database
         mDatabase.delete(CrimeTable.NAME, CrimeTable.Cols.UUID + " = ?",
-                new String[] {uuidString});
+                new String[]{uuidString});
     }
 
 
@@ -142,6 +144,23 @@ public class CrimeLab {
             crimeCursorWrapper.close();             // To avoid cursor exceptions
         }
 
+    }
+
+    /**
+     * Finds the directory for storing pictures
+     *
+     * @param crime
+     * @return File object that points to the right location
+     */
+    public File getPhotoFile(Crime crime) {
+
+        // Get reference to external files directory for pictures
+        File externalFilesDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        // Check: If there exists an external storage to save the pictures
+        if (externalFilesDir == null) return null;
+
+        return new File(externalFilesDir, crime.getPhotoFilename());
     }
 
     /**
