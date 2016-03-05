@@ -229,10 +229,7 @@ public class CrimeFragment extends Fragment {
         // For checking if an app is unavailable
         PackageManager packageManager = getActivity().getPackageManager();
 
-        // Get reference to photo view
-        mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
-
-        createOrUpdatePhotoView();                      // Photo View
+        createOrUpdatePhotoView(view);                  // Photo View
         createPhotoButton(view, packageManager);        // Photo Button
 
         createTitleField(view);                         // Title Field
@@ -273,7 +270,10 @@ public class CrimeFragment extends Fragment {
         });
     }
 
-    private void createOrUpdatePhotoView() {
+    private void createOrUpdatePhotoView(View view) {
+
+        // Get reference to photo view
+        mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
 
         // Check: mPhotoFile is null
         // If so, set mPhotoView's drawable to null
@@ -284,9 +284,11 @@ public class CrimeFragment extends Fragment {
 
         } else {
 
-            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
+            final Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), getActivity());
 
             mPhotoView.setImageBitmap(bitmap);
+
+            Log.d(TAG, "Photo Path: " + mPhotoFile.getPath());
 
         }
 
@@ -638,7 +640,7 @@ public class CrimeFragment extends Fragment {
 
             case (REQUEST_PHOTO):
 
-                createOrUpdatePhotoView();
+                createOrUpdatePhotoView(getView());
 
         }
 

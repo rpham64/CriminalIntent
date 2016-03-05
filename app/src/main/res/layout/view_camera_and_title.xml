@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/view_camera_and_title_container"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginLeft="16dp"
-              android:layout_marginRight="16dp">
+              android:layout_marginRight="16dp"
+              android:padding="10dp">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -27,11 +29,28 @@
 
     </LinearLayout>
 
+    <!-- This initially-hidden ImageView will hold the expanded/zoomed
+    version of the first ImageButton above. Without transformations,
+    the ImageView takes up the entire screen. -->
+
+    <!-- To achieve the "zoom" animation, this view's bounds are animated
+    from the bounds of the thumbnail button above, to its final laid-out
+    bounds. -->
+
+    <ImageView
+        android:id="@+id/crime_photo_expanded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
 
         <TextView
             android:text="@string/crime_title_label"
@@ -48,4 +67,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>
