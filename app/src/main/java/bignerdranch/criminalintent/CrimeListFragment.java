@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -24,11 +22,14 @@ import java.util.List;
  */
 public class CrimeListFragment extends Fragment {
 
+    // TAG for CrimeListFragment
+    private static final String TAG = "CrimeListFragment";
+
     // Key for storing mSubtitleVisible in savedInstanceState
     private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
     // RecyclerView
-    private RecyclerView mCrimeRecyclerView;
+    private EmptyRecyclerView mCrimeRecyclerView;
 
     // Adapter
     private CrimeAdapter mAdapter;
@@ -69,10 +70,13 @@ public class CrimeListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
 
         // Call reference to mCrimeRecyclerView
-        mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
+        mCrimeRecyclerView = (EmptyRecyclerView) view.findViewById(R.id.crime_recycler_view);
 
         // Set layout manager for mCrimeRecyclerView
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        // Set Empty View
+        mCrimeRecyclerView.setEmptyView(view.findViewById(android.R.id.empty));
 
         // Check: If mSubtitleVisible is saved in savedInstanceState
         if (savedInstanceState != null) {
@@ -203,23 +207,6 @@ public class CrimeListFragment extends Fragment {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
-        // If list is empty, create a message that says "No crimes here! Click the
-        // "+" button above to add a new crime."
-        if (crimes.size() == 0) {
-
-            // Create toast
-            Toast toast = Toast.makeText(getActivity(), R.string.toast_crime_list_empty, Toast.LENGTH_SHORT);
-
-            // Align text in Toast to center
-            TextView textView = (TextView) toast.getView().findViewById(android.R.id.message);
-            if (textView != null) {
-                textView.setGravity(Gravity.CENTER);
-            }
-
-            // Display toast message
-            toast.show();
-        }
-
         // If mAdapter is null, create a new CrimeAdapter and set to mCrimeRecyclerView's adapter
         // Else, send notification that an item has changed
         if (mAdapter == null) {
@@ -238,7 +225,14 @@ public class CrimeListFragment extends Fragment {
         updateSubtitle();
     }
 
-    // Define CrimeAdapter (Adapter) as an inner class
+    /**
+     * Adapter subclass
+     *
+     * Responsible for:
+     *  1) Creating necessary ViewHolders (CrimeHolder)
+     *  2) Binding ViewHolders to data from the model layer
+     *
+     */
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
 
         private List<Crime> mCrimes;    // List of crimes
@@ -305,10 +299,9 @@ public class CrimeListFragment extends Fragment {
     }
 
     /**
-     * CrimeHolder class
+     * ViewHolder subclass
      *
-     * View components: Title, Date, Solved checkbox
-     *
+     * Role: To hold onto a View
      */
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
