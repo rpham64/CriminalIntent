@@ -79,6 +79,9 @@ public class CrimeFragment extends Fragment {
     // Unique Contact Phone Number
     private String contactNumber;
 
+    // Zoom Image View
+    private ZoomImageView mZoomImageView;
+
     private Crime mCrime;                   // Crime
     private File mPhotoFile;                // Photo File Location
     private EditText mTitleField;           // Title of Crime
@@ -275,6 +278,9 @@ public class CrimeFragment extends Fragment {
         // Get reference to photo view
         mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
 
+        // Zoomed Image View
+        mZoomImageView = (ZoomImageView) view.findViewById(R.id.crime_photo_expanded);
+
         // Check: mPhotoFile is null
         // If so, set mPhotoView's drawable to null
         // Else, Create a scaled bitmap and set it to mPhotoView
@@ -288,9 +294,25 @@ public class CrimeFragment extends Fragment {
 
             mPhotoView.setImageBitmap(bitmap);
 
+            mZoomImageView.setImageBitmap(bitmap);
+
             Log.d(TAG, "Photo Path: " + mPhotoFile.getPath());
 
         }
+
+        mPhotoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mZoomImageView.setVisibility(View.VISIBLE);
+            }
+        });
+
+        mZoomImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mZoomImageView.setVisibility(View.INVISIBLE);
+            }
+        });
 
     }
 
@@ -309,7 +331,7 @@ public class CrimeFragment extends Fragment {
         // Disable camera button if canTakePhoto is false. Else, set enabled.
         mPhotoButton.setEnabled(canTakePhoto);
 
-        // If canTakePhoto is true, read in the Uri from mPhotoFile and
+        // If canTakePhoto is true, create Uri from mPhotoFile and
         // Add an extra to captureImage with MediaStore.EXTRA_OUTPUT
         if (canTakePhoto) {
             Uri uri = Uri.fromFile(mPhotoFile);

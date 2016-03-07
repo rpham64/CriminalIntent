@@ -33,6 +33,9 @@ public class ZoomActivity extends FragmentActivity {
     // Photo View
     private View mPhotoView;
 
+    // Crime
+    private Crime mCrime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
