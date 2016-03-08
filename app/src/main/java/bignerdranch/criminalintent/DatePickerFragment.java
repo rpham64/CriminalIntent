@@ -23,11 +23,11 @@ public class DatePickerFragment extends DialogFragment {
     // TAG for DatePickerFragment
     private static final String TAG = "DatePickerFragment";
 
-    // Fragment argument for Date
-    private static final String ARG_DATE = "date";
-
     // Key for Date extra
     public static final String EXTRA_DATE = "com.bignerdranch.android.criminalintent.date";
+
+    // Fragment argument for Date
+    private static final String ARG_DATE = "date";
 
     // DatePicker widget
     private DatePicker mDatePicker;

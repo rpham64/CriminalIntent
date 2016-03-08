@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -21,6 +23,9 @@ import java.io.File;
  */
 public class ZoomActivity extends FragmentActivity {
 
+    // EXTRA for mPhotoFile
+    private static final String EXTRA_PHOTO_FILE = "photo file";
+
     // Reference to current animator (can be canceled mid-way)
     private Animator mCurrentAnimator;
 
@@ -35,6 +40,19 @@ public class ZoomActivity extends FragmentActivity {
 
     // Crime
     private Crime mCrime;
+
+    /**
+     * Create new Intent with Extra
+     *
+     * @param packageContext
+     * @param mPhotoFile
+     * @return
+     */
+    public static Intent newIntent(Context packageContext, File mPhotoFile) {
+        Intent intent = new Intent(packageContext, CrimePagerActivity.class);
+        intent.putExtra(EXTRA_PHOTO_FILE, mPhotoFile);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

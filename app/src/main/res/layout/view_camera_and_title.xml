@@ -37,12 +37,6 @@
     from the bounds of the thumbnail button above, to its final laid-out
     bounds. -->
 
-    <bignerdranch.criminalintent.ZoomImageView
-        android:id="@+id/crime_photo_expanded"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"/>
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

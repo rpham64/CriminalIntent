@@ -43,22 +43,22 @@ import java.util.UUID;
  */
 public class CrimeFragment extends Fragment {
 
-    // TAG for CrimeFragment
+    // TAG for filtering log messages
     private static final String TAG = "CrimeFragment";
 
-    // KEY for contactID
+    // KEY for contactID (savedPreferences)
     private static final String KEY_ID = "id";
 
-    // KEY for contactNumber
+    // KEY for contactNumber (savedPreferences)
     private static final String KEY_NUMBER = "number";
 
-    // Fragment argument for crime_id
+    // Fragment argument for crime ID
     private static final String ARG_CRIME_ID = "crime_id";
 
-    // Tag for DatePickerFragment
+    // Tag for DatePickerFragment dialog fragment
     private static final String DIALOG_DATE = "DialogDate";
 
-    // Tag for TimePickerFragment
+    // Tag for TimePickerFragment dialog fragment
     private static final String DIALOG_TIME = "DialogTime";
 
     // Request code for Date (sent by DatePickerFragment)
@@ -128,6 +128,11 @@ public class CrimeFragment extends Fragment {
         editor.commit();
     }
 
+    /**
+     * Saves fragment state on configuration change (not on destroy)
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
@@ -229,7 +234,7 @@ public class CrimeFragment extends Fragment {
         // Inflates the layout "fragment_crime.xml"
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
-        // For checking if an app is unavailable
+        // Checks if an app called via implicit intent is unavailable
         PackageManager packageManager = getActivity().getPackageManager();
 
         createOrUpdatePhotoView(view);                  // Photo View
@@ -239,6 +244,7 @@ public class CrimeFragment extends Fragment {
         createDateButton(view);                         // Date Button
         createTimeButton(view);                         // Time Button
         createSolvedCheckbox(view);                     // Solved Checkbox
+
         createSuspectButton(view, packageManager);      // Suspect Button
         createCallButton(view);                         // Call Suspect Button
         createReportButton(view);                       // Report Button
@@ -248,13 +254,10 @@ public class CrimeFragment extends Fragment {
 
     private void createTitleField(View view) {
 
-        // Get reference to Title field (inflate widget)
         mTitleField = (EditText) view.findViewById(R.id.crime_title);
 
-        // Set field's title to Crime's title
         mTitleField.setText(mCrime.getTitle());
 
-        // Add a listener for Title field
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -275,15 +278,11 @@ public class CrimeFragment extends Fragment {
 
     private void createOrUpdatePhotoView(View view) {
 
-        // Get reference to photo view
         mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
 
-        // Zoomed Image View
         mZoomImageView = (ZoomImageView) view.findViewById(R.id.crime_photo_expanded);
 
-        // Check: mPhotoFile is null
-        // If so, set mPhotoView's drawable to null
-        // Else, Create a scaled bitmap and set it to mPhotoView
+        // If mPhotoFile exists, set mPhotoView to the image in mPhotoFile
         if (mPhotoFile == null || !mPhotoFile.exists()) {
 
             mPhotoView.setImageDrawable(null);
@@ -300,6 +299,9 @@ public class CrimeFragment extends Fragment {
 
         }
 
+        /**
+         * Displays zoomed-in view of mPhotoView (Ch. 16 Challenge: Detail Display)
+         */
         mPhotoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -317,7 +319,8 @@ public class CrimeFragment extends Fragment {
     }
 
     private void createPhotoButton(View view, PackageManager packageManager) {
-        // Get reference to camera button
+
+        // Inflate camera button
         mPhotoButton = (ImageButton) view.findViewById(R.id.crime_camera);
 
         // Create an intent with action ACTION_IMAGE_CAPTURE
@@ -338,7 +341,6 @@ public class CrimeFragment extends Fragment {
             captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         }
 
-        // Create listener for mPhotoButton
         mPhotoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -349,13 +351,12 @@ public class CrimeFragment extends Fragment {
 
     private void createDateButton(View view) {
 
-        // Get reference to Date Button
+        // Inflate Date Button
         mDateButton = (Button) view.findViewById(R.id.crime_date);
 
         // Update DateButton's text
         updateDate();
 
-        // Create listener for Date Button
         mDateButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -374,13 +375,12 @@ public class CrimeFragment extends Fragment {
 
     private void createTimeButton(View view) {
 
-        // Get reference to Time Button
+        // Inflate Time Button
         mTimeButton = (Button) view.findViewById(R.id.crime_time);
 
         // Update DateButton's text
         updateTime();
 
-        // Create listener for Time Button
         mTimeButton.setOnClickListener(new View.OnClickListener() {
 
             /**
@@ -399,17 +399,15 @@ public class CrimeFragment extends Fragment {
 
     private void createSolvedCheckbox(View view) {
 
-        // Get reference to Solved CheckBox
+        // Inflate Solved CheckBox
         mSolvedCheckBox = (CheckBox) view.findViewById(R.id.crime_solved);
 
         // Set Checked status
         mSolvedCheckBox.setChecked(mCrime.isSolved());
 
-        // Add a listener for Solved CheckBox
         mSolvedCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // Set crime's solved property
                 mCrime.setSolved(isChecked);
             }
         });
@@ -421,7 +419,6 @@ public class CrimeFragment extends Fragment {
         final Intent pickContact = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
 
-        // Get reference to Suspect Button and create its listener
         mSuspectButton = (Button) view.findViewById(R.id.crime_suspect);
         mSuspectButton.setOnClickListener(new View.OnClickListener() {
 
@@ -450,7 +447,6 @@ public class CrimeFragment extends Fragment {
 
     private void createCallButton(View view) {
 
-        // Get reference to Call Button and create its listener
         mCallSuspectButton = (Button) view.findViewById(R.id.crime_call_suspect);
         mCallSuspectButton.setOnClickListener(new View.OnClickListener() {
 
@@ -478,7 +474,6 @@ public class CrimeFragment extends Fragment {
 
     private void createReportButton(View view) {
 
-        // Get reference to Report Button and create its listener
         mReportButton = (Button) view.findViewById(R.id.crime_report);
         mReportButton.setOnClickListener(new View.OnClickListener() {
 
@@ -752,40 +747,6 @@ public class CrimeFragment extends Fragment {
         Log.d(TAG, "Contact Phone Number: " + contactNumber);
 
     }
-/*
-    *//**
-     * Given contact name, returns his phone number as a string.
-     *
-     * @param name
-     * @return
-     *//*
-    private String getPhoneNumber(String name) {
-
-        String number = null;
-        Uri contentUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        String[] projection = new String[] {ContactsContract.CommonDataKinds.Phone.NUMBER};
-        String selection = ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " = ? AND " + name;
-        Cursor cursor = getActivity().getContentResolver().query(
-                contentUri, projection, selection, null, null
-        );
-
-        try {
-
-            if (cursor.moveToFirst()) {
-                number = cursor.getString(0);
-            }
-
-        } finally {
-            cursor.close();
-        }
-
-        // Check: Number is null
-        if (number == null) {
-            number = "Unsaved";
-        }
-
-        return number;
-    }*/
 
     /**
      * Formats Crime's date to a user-friendly format and
