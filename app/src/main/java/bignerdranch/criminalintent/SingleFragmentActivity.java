@@ -1,27 +1,32 @@
 package bignerdranch.criminalintent;
 
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
 /**
+ * Superclass for CriminalIntent's activities
+ *
  * Created by Rudolf on 2/10/2016.
  */
 public abstract class SingleFragmentActivity extends AppCompatActivity {
 
-    // Abstract member variable (to be implemented in subclasses)
     protected abstract Fragment createFragment();
 
-    /** Called when the activity is first created */
+    @LayoutRes
+    protected int getLayoutResId() {
+        return R.layout.activity_fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+        setContentView(getLayoutResId());
 
-        // Get FragmentManager
-        // Check FragmentManager if CrimeFragment exists
-        // If null, create new CrimeFragment and add to FragmentManager
+        // Inflate fragment from fragment manager
+        // If null, create a new fragment with container fragment_container.xml
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
