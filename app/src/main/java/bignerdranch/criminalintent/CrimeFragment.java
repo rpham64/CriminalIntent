@@ -490,7 +490,7 @@ public class CrimeFragment extends Fragment {
 
                 intentBuilder.setChooserTitle(R.string.send_report)
                         .setType("text/plain")
-                        .setSubject(getString(R.string.crime_report_suspect))
+                        .setSubject(getString(R.string.crime_report_subject))
                         .setText(getCrimeReport());
 
                 // Create chooser intent and send to OS
