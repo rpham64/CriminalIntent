@@ -174,20 +174,6 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        Log.d(TAG, "On Start");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Log.d(TAG, "On Resume");
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
@@ -195,20 +181,6 @@ public class CrimeFragment extends Fragment {
 
         // Updates CrimeLab's copy of mCrime
         CrimeLab.get(getActivity()).updateCrime(mCrime);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        Log.d(TAG, "On Stop");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.d(TAG, "On Destroy");
     }
 
     /**
