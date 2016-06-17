@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Controller;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 
 import java.util.List;
 import java.util.UUID;
+
+import bignerdranch.criminalintent.Model.Crime;
+import bignerdranch.criminalintent.Model.CrimeLab;
+import bignerdranch.criminalintent.R;
 
 /**
  * Hosting Activity for ViewPager

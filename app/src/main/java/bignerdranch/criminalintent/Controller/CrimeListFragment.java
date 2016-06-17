@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Controller;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,7 +17,13 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import bignerdranch.criminalintent.Model.Crime;
+import bignerdranch.criminalintent.Model.CrimeLab;
+import bignerdranch.criminalintent.R;
+
 /**
+ * Test
+ *
  * Created by Rudolf on 2/10/2016.
  */
 public class CrimeListFragment extends Fragment {

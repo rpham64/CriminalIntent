@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Controller;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -37,6 +37,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
+
+import bignerdranch.criminalintent.Model.Crime;
+import bignerdranch.criminalintent.Model.CrimeLab;
+import bignerdranch.criminalintent.Utils.PictureUtils;
+import bignerdranch.criminalintent.R;
+import bignerdranch.criminalintent.ZoomImageView;
 
 /**
  * Created by Rudolf on 2/8/2016.
