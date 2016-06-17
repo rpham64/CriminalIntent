@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Model;
 
 import java.util.Date;
 import java.util.UUID;

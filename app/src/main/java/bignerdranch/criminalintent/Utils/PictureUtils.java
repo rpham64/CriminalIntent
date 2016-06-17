@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Utils;
 
 import android.app.Activity;
 import android.graphics.Bitmap;

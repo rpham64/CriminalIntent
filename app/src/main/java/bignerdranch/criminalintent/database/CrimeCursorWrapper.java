@@ -6,7 +6,7 @@ import android.database.CursorWrapper;
 import java.util.Date;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.Crime;
+import bignerdranch.criminalintent.Model.Crime;
 import bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
 
 /**

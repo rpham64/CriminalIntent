@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.Controller;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -14,6 +14,8 @@ import android.widget.DatePicker;
 
 import java.util.Calendar;
 import java.util.Date;
+
+import bignerdranch.criminalintent.R;
 
 /**
  * Created by Rudolf on 2/12/2016.
