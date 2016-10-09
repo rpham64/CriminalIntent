@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -16,8 +16,9 @@ import android.widget.ImageView;
 
 import java.io.File;
 
-import bignerdranch.criminalintent.Controller.CrimePagerActivity;
-import bignerdranch.criminalintent.Model.Crime;
+import bignerdranch.criminalintent.R;
+import bignerdranch.criminalintent.ui.CrimePagerActivity;
+import bignerdranch.criminalintent.models.Crime;
 
 /**
  * Zoom animation for enlarging ImageView in CrimeFragment.java

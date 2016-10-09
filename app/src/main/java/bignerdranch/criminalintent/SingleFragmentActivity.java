@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.Controller;
+package bignerdranch.criminalintent;
 
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;

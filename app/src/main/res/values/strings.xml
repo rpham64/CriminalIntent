@@ -26,6 +26,7 @@
     <string name="send_report">Send crime report via</string>
     <string name="crime_call_suspect_button">Call</string>
     <string name="crime_list_empty">Add an item above to get started!</string>
+    <string name="permissions_to_retrieve_contact_failed">Until permissions are granted, we cannot display the names</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s crime</item>

@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.utils;
 
 import android.content.Context;
 import android.graphics.Canvas;

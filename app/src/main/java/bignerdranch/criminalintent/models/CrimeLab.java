@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.Model;
+package bignerdranch.criminalintent.models;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.database.CrimeBaseHelper;
-import bignerdranch.criminalintent.database.CrimeCursorWrapper;
-import bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
+import bignerdranch.criminalintent.models.database.CrimeBaseHelper;
+import bignerdranch.criminalintent.models.database.CrimeCursorWrapper;
+import bignerdranch.criminalintent.models.database.CrimeDbSchema.CrimeTable;
 
 /**
  * Singleton to hold Crime data
@@ -79,7 +79,7 @@ public class CrimeLab {
     public void deleteCrime(Crime crime) {
 
         // Get Crime UUID
-        String uuidString = crime.getID().toString();
+        String uuidString = crime.getId().toString();
 
         // Delete crime's contentValues from database
         mDatabase.delete(CrimeTable.NAME, CrimeTable.Cols.UUID + " = ?",
@@ -171,7 +171,7 @@ public class CrimeLab {
     public void updateCrime(Crime crime) {
 
         // Crime UUID
-        String uuidString = crime.getID().toString();
+        String uuidString = crime.getId().toString();
 
         // ContentValues of crime
         ContentValues contentValues = getContentValues(crime);
@@ -182,6 +182,10 @@ public class CrimeLab {
 
     }
 
+    public int getItemCount() {
+        return getCrimes().size();
+    }
+
     /**
      * Returns ContentValues for given Crime
      *
@@ -190,7 +194,7 @@ public class CrimeLab {
      */
     private static ContentValues getContentValues(Crime crime) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(CrimeTable.Cols.UUID, crime.getID().toString());
+        contentValues.put(CrimeTable.Cols.UUID, crime.getId().toString());
         contentValues.put(CrimeTable.Cols.TITLE, crime.getTitle());
         contentValues.put(CrimeTable.Cols.DATE, crime.getDate().getTime());
         contentValues.put(CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
@@ -221,5 +225,4 @@ public class CrimeLab {
 
         return new CrimeCursorWrapper(cursor);
     }
-
 }

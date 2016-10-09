@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.Model;
+package bignerdranch.criminalintent.models;
 
 import java.util.Date;
 import java.util.UUID;
@@ -8,36 +8,28 @@ import java.util.UUID;
  */
 public class Crime {
 
-    private UUID mID;                   // Unique crime ID
+    private UUID mId;                   // Unique crime ID
     private String mTitle;              // Crime Title
     private Date mDate;                 // Date of Crime
     private boolean mSolved;            // Crime solved or not
     private String mSuspect;            // Name of suspect
 
-
     /**
      * Construct Crime with random UUID
      */
     public Crime() {
-        this(UUID.randomUUID());    // Generate unique identifier via random UUId
+        this(UUID.randomUUID());
     }
 
-    /**
-     * Construct Crime with specific UUID
-     *
-     * @param id
-     */
     public Crime(UUID id) {
-        mID = id;
+        mId = id;
         mDate = new Date();
     }
 
-    /** Getter for mID */
-    public UUID getID() {
-        return mID;
+    public UUID getId() {
+        return mId;
     }
 
-    /** Getters and Setters for mTitle */
     public String getTitle() {
         return mTitle;
     }
@@ -46,7 +38,6 @@ public class Crime {
         mTitle = title;
     }
 
-    /** Getters and Setters for mDate */
     public Date getDate() {
         return mDate;
     }
@@ -55,7 +46,6 @@ public class Crime {
         mDate = date;
     }
 
-    /** Getters and Setters for mSolved */
     public boolean isSolved() {
         return mSolved;
     }
@@ -64,7 +54,6 @@ public class Crime {
         mSolved = solved;
     }
 
-    /** Getters and Setters for mSuspect */
     public String getSuspect() {
         return mSuspect;
     }
@@ -81,7 +70,7 @@ public class Crime {
      * @return
      */
     public String getPhotoFilename() {
-        return "IMG_" + getID().toString() + ".jpg";
+        return "IMG_" + getId().toString() + ".jpg";
     }
 
 }

@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.database;
+package bignerdranch.criminalintent.models.database;
 
 /**
  * Database Schema implementation for SQLite Databases (Ch. 14)
@@ -23,6 +23,5 @@ public class CrimeDbSchema {
         }
 
     }
-
 
 }

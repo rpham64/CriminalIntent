@@ -99,7 +99,7 @@
 
     </LinearLayout>
 
-    <bignerdranch.criminalintent.ZoomImageView
+    <bignerdranch.criminalintent.utils.ZoomImageView
         android:id="@+id/crime_photo_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

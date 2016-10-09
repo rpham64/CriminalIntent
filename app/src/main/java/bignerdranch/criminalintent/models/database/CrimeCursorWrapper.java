@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.database;
+package bignerdranch.criminalintent.models.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -6,8 +6,7 @@ import android.database.CursorWrapper;
 import java.util.Date;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.Model.Crime;
-import bignerdranch.criminalintent.database.CrimeDbSchema.CrimeTable;
+import bignerdranch.criminalintent.models.Crime;
 
 /**
  * Implementation for wrapping a Cursor and adding new methods
@@ -28,11 +27,11 @@ public class CrimeCursorWrapper extends CursorWrapper {
     public Crime getCrime() {
 
         // Get reference to relevant Crime column data
-        String uuidString = getString(getColumnIndex(CrimeTable.Cols.UUID));
-        String title = getString(getColumnIndex(CrimeTable.Cols.TITLE));
-        long date = getLong(getColumnIndex(CrimeTable.Cols.DATE));
-        int isSolved = getInt(getColumnIndex(CrimeTable.Cols.SOLVED));
-        String suspect = getString(getColumnIndex(CrimeTable.Cols.SUSPECT));
+        String uuidString = getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.UUID));
+        String title = getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.TITLE));
+        long date = getLong(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.DATE));
+        int isSolved = getInt(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.SOLVED));
+        String suspect = getString(getColumnIndex(CrimeDbSchema.CrimeTable.Cols.SUSPECT));
 
         // Create new Crime with above data
         Crime crime = new Crime(UUID.fromString(uuidString));

@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.Controller;
+package bignerdranch.criminalintent.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,8 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.List;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.Model.Crime;
-import bignerdranch.criminalintent.Model.CrimeLab;
+import bignerdranch.criminalintent.models.Crime;
+import bignerdranch.criminalintent.models.CrimeLab;
 import bignerdranch.criminalintent.R;
 
 /**
@@ -71,7 +71,7 @@ public class CrimePagerActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int position) {
                 Crime crime = mCrimes.get(position);
-                return CrimeFragment.newInstance(crime.getID());
+                return CrimeFragment.newInstance(crime.getId());
             }
 
             @Override
@@ -82,7 +82,7 @@ public class CrimePagerActivity extends AppCompatActivity {
 
         // Set current index to clicked Crime's index
         for (int i = 0; i < mCrimes.size(); i++) {
-            if (mCrimes.get(i).getID().equals(crimeID)) {
+            if (mCrimes.get(i).getId().equals(crimeID)) {
                 mViewPager.setCurrentItem(i);
                 break;
             }

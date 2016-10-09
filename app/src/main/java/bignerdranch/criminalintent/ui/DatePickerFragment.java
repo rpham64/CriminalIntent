@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.Controller;
+package bignerdranch.criminalintent.ui;
 
 import android.app.Activity;
 import android.app.Dialog;

@@ -10,18 +10,6 @@
 
         <include layout="@layout/view_camera_and_title"/>
 
-        <!--    <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/crime_title_label"
-                style="?android:listSeparatorTextViewStyle"/>
-
-            <EditText
-                android:id="@+id/crime_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/crime_title_hint"/>-->
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -93,7 +81,7 @@
 
     </LinearLayout>
 
-    <bignerdranch.criminalintent.ZoomImageView
+    <bignerdranch.criminalintent.utils.ZoomImageView
         android:id="@+id/crime_photo_expanded"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

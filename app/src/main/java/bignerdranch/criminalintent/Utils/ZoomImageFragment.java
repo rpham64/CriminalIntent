@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package bignerdranch.criminalintent.utils;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.io.Serializable;
+
+import bignerdranch.criminalintent.R;
 
 /**
  * Displays a zoomed-in ImageView on click
