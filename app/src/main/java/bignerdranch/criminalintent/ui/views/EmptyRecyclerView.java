@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui;
+package bignerdranch.criminalintent.ui.views;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

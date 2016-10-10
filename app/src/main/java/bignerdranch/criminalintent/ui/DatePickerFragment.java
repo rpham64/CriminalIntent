@@ -2,12 +2,10 @@ package bignerdranch.criminalintent.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -16,72 +14,62 @@ import java.util.Calendar;
 import java.util.Date;
 
 import bignerdranch.criminalintent.R;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
+ * An AlertDialog with DatePicker widget
+ *
  * Created by Rudolf on 2/12/2016.
  */
 public class DatePickerFragment extends DialogFragment {
 
-    // TAG for DatePickerFragment
-    private static final String TAG = "DatePickerFragment";
+    private static final String TAG = DatePickerFragment.class.getName();
 
-    // Key for Date extra
-    public static final String EXTRA_DATE = "com.bignerdranch.android.criminalintent.date";
+    public interface Extras {
+        String date = "DatePickerFragment.date";
+    }
 
-    // Fragment argument for Date
-    private static final String ARG_DATE = "date";
+    interface Arguments {
+        String date = "ARG_DATE";
+    }
 
-    // DatePicker widget
-    private DatePicker mDatePicker;
+    @BindView(R.id.dialog_date_picker) DatePicker mDatePicker;
 
-    // Date
+    private Unbinder mUnbinder;
     private Date mDate;
 
-    /**
-     * Creates a new instance of DatePickerFragment and
-     * stores fragment arguments to access Intent extras
-     *
-     * @return
-     */
     public static DatePickerFragment newInstance(Date date) {
 
         Bundle args = new Bundle();
-        args.putSerializable(ARG_DATE, date);
+        args.putSerializable(Arguments.date, date);
 
         DatePickerFragment fragment = new DatePickerFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    /**
-     * Create AlertDialog with DatePicker widget
-     *
-     * @param savedInstanceState
-     * @return
-     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        // Retrieve Date from fragment arguments
-        Date date = (Date) getArguments().getSerializable(ARG_DATE);
+        View view = LayoutInflater.from(getActivity())
+                .inflate(R.layout.dialog_date, null);
+        mUnbinder = ButterKnife.bind(this, view);
 
-        // Create a Calendar and set the time to Date
+        if (getArguments() != null) {
+            mDate = (Date) getArguments().getSerializable(Arguments.date);
+        }
+
         final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-
-        Log.d(TAG, "Current Date: " + date);
+        calendar.setTime(mDate);
 
         // Store current year, month, and day as integers
         int year = calendar.get(Calendar.YEAR);
         final int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        // Inflate DatePicker view
-        View view = LayoutInflater.from(getActivity())
-                .inflate(R.layout.dialog_date, null);
-
         // Set DatePicker's view using the stored year, month, day variables
-        mDatePicker = (DatePicker) view.findViewById(R.id.dialog_date_date_picker);
         mDatePicker.init(year, month, day, new DatePicker.OnDateChangedListener() {
             @Override
             public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -91,13 +79,7 @@ public class DatePickerFragment extends DialogFragment {
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                Log.d(TAG, "Year :" + year);
-                Log.d(TAG, "Month :" + month);
-                Log.d(TAG, "Day :" + dayOfMonth);
-
                 mDate = calendar.getTime();
-
-                Log.d(TAG, "New Date: " + mDate);
             }
         });
 
@@ -105,28 +87,21 @@ public class DatePickerFragment extends DialogFragment {
         // Fixes bug of opening dialog and not choosing a new date
         mDate = calendar.getTime();
 
-        Log.d(TAG, "New date: " + mDate);
-
-        // Store updated mDate in argument
-        getArguments().putSerializable(ARG_DATE, mDate);
+        getArguments().putSerializable(Arguments.date, mDate);
 
         // Return an instance of AlertDialog with the DatePicker widget
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
                 .setTitle(R.string.date_picker_title)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    /**
-                     * On click, sends Intent with Date extra to the target fragment
-                     *
-                     * @param dialog
-                     * @param which
-                     */
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        sendResult(Activity.RESULT_OK);
-                    }
-                })
+                .setPositiveButton(android.R.string.ok,
+                        (dialog, which) -> sendResult(Activity.RESULT_OK))
                 .create();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     /**
@@ -137,14 +112,11 @@ public class DatePickerFragment extends DialogFragment {
      */
     private void sendResult(int resultCode) {
 
-        // Check: TargetFragment exists or not
         if (getTargetFragment() == null) return;
 
-        // Create a new intent with the date extra
         Intent intent = new Intent();
-        intent.putExtra(EXTRA_DATE, mDate);
+        intent.putExtra(Extras.date, mDate);
 
-        // Send intent to target fragment using TargetFragment.onActivityResult
         getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, intent);
     }
 }

@@ -56,6 +56,7 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'frankiesardo:icepick:3.2.0'
     provided 'frankiesardo:icepick-processor:3.2.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 
     // Debugging
     compile 'com.orhanobut:logger:1.15'

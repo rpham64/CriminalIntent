@@ -27,8 +27,12 @@
         <activity
             android:name=".ui.CrimePagerActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".ui.CrimeListActivity">
-        </activity>
+            android:parentActivityName=".ui.CrimeListActivity"/>
+        <activity
+            android:name=".ui.AboutActivity"
+            android:label="@string/about_my_app"
+            android:parentActivityName=".ui.CrimeListActivity"
+            android:theme="@style/AboutLibrariesTheme" />
     </application>
 
 </manifest>

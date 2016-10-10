@@ -18,6 +18,7 @@ import bignerdranch.criminalintent.R;
 import bignerdranch.criminalintent.models.Crime;
 import bignerdranch.criminalintent.models.CrimeLab;
 import bignerdranch.criminalintent.ui.adapters.CrimeListAdapter;
+import bignerdranch.criminalintent.ui.views.EmptyRecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -32,7 +33,8 @@ public class CrimeListFragment extends BaseFragment {
 
     private static final String TAG = CrimeListFragment.class.getName();
 
-    @BindView(R.id.crime_recycler_view) EmptyRecyclerView recyclerView;
+    @BindView(R.id.crime_recycler_view)
+    EmptyRecyclerView recyclerView;
 
     @State boolean isSubtitleVisible;
 
@@ -116,6 +118,10 @@ public class CrimeListFragment extends BaseFragment {
 
                 return true;
 
+            case (R.id.menu_item_about_app):
+                Intent aboutActivity = new Intent(getActivity(), AboutActivity.class);
+                startActivity(aboutActivity);
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -127,11 +133,9 @@ public class CrimeListFragment extends BaseFragment {
     private void updateSubtitle() {
 
         int crimeCount = CrimeLab.get(getActivity()).getItemCount();
-
-        String subtitle = getResources()
-                .getQuantityString(R.plurals.subtitle_plural, crimeCount, crimeCount);
-
-        if (!isSubtitleVisible) subtitle = null;
+        String subtitle = isSubtitleVisible ?
+                getResources().getQuantityString(R.plurals.subtitle_plural, crimeCount, crimeCount) :
+                null;
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setSubtitle(subtitle);
     }
