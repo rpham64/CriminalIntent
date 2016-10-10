@@ -1,5 +1,14 @@
 <resources>
-    <string name="app_name">CriminalIntent</string>
+    <string name="app_name">Criminal Intent</string>
+    <string name="about_description">
+        <![CDATA[A simple list for keeping track of "office crimes" in the workplace. Great for catching those troublemakers!
+        <br />
+            <br>
+                <a href="https://icons8.com">App icon is by Icons8.</a> Recolored with Android Asset Studio.
+            </br>
+        ]]>
+    </string>
+    <string name="icon_by_icons8"></string>
     <string name="action_settings">Settings</string>
     <string name="crime_title_hint">Enter a title for the crime.</string>
     <string name="crime_title_label">Title</string>

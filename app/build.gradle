@@ -3,11 +3,18 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
+    signingConfigs {
+        release {
+            keyAlias KEY_ALIAS
+            keyPassword KEY_PASSWORD
+            storeFile file('C:/Users/Rudolf/Keystores/criminal_intent.jks')
+            storePassword KEYSTORE_PASSWORD
+        }
+    }
     compileSdkVersion 24
     buildToolsVersion "24.0.3"
-
     defaultConfig {
-        applicationId "bignerdranch.criminalintent"
+        applicationId "com.rpham64.android.criminalintent"
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 1
@@ -17,6 +24,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
@@ -50,21 +58,17 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.android.support:recyclerview-v7:24.2.1'
-
     // UI
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'frankiesardo:icepick:3.2.0'
     provided 'frankiesardo:icepick-processor:3.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-
     // Debugging
     compile 'com.orhanobut:logger:1.15'
-
     // Testing
     androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
     testCompile 'org.robolectric:robolectric:3.1.1'
-
     // About My App
     compile('com.mikepenz:aboutlibraries:5.8.1@aar') {
         transitive = true

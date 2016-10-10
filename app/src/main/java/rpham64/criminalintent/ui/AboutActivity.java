@@ -21,9 +21,7 @@ public class AboutActivity extends LibsActivity {
                 .withAboutIconShown(true)
                 .withAboutVersionShown(true)
                 .withAboutAppName(getResources().getString(R.string.app_name))
-                .withAboutDescription(
-                        "A simple list for keeping track of \"office crimes\" in the workplace. " +
-                                "Great for catching those troublemakers!");
+                .withAboutDescription(getResources().getString(R.string.about_description));
 
         setIntent(builder.intent(this));
         super.onCreate(savedInstanceState);
