@@ -11,27 +11,13 @@ etc. It's a simple app that I developed for learning the basics of Android.
 
 # Installation
 
-1. Clone the repository to a folder of your choice
-
-  ` $ cd <path to your folder> `
-  
-  ` $ git init `
-  
-  ` $ git clone https://github.com/rpham64/CriminalIntent.git `
-
-2. Open Android Studio.
-
-3. Go to **File -> New -> Import Project**.
-
-4. Choose the project **CriminalIntent**.
-
-5. Click **Next -> Finish**.
+  * Download from the Google Play store here: [Criminal Intent](https://play.google.com/store/apps/details?id=com.rpham64.android.criminalintent&hl=en)
 
 # Technical Concepts
 
   * Activity & Fragment Lifecycles
   * Explicit vs. Implicit Intents
-  * MVC Design (RecyclerView, ViewHolder, Adapter)
+  * MVC Design
   * SQLite Databases
   * Singletons
   * ViewPager and PagerAdapter (used FragmentStatePagerAdapter)
@@ -47,4 +33,4 @@ etc. It's a simple app that I developed for learning the basics of Android.
 # Contact Me!
 
   * LinkedIn: https://www.linkedin.com/in/rudolfpham
-  * E-mail: rpham64@berkeley.edu
+  * E-mail: rpham64@gmail.com
