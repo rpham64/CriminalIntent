@@ -1,8 +1,8 @@
-package bignerdranch.criminalintent.ui;
+package rpham64.criminalintent.ui;
 
 import android.support.v4.app.Fragment;
 
-import bignerdranch.criminalintent.SingleFragmentActivity;
+import rpham64.criminalintent.SingleFragmentActivity;
 
 /**
  * Activity that hosts a list of Crime objects

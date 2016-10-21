@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.models.database;
+package rpham64.criminalintent.models.database;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
@@ -6,7 +6,7 @@ import android.database.CursorWrapper;
 import java.util.Date;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.models.Crime;
+import rpham64.criminalintent.models.Crime;
 
 /**
  * Implementation for wrapping a Cursor and adding new methods

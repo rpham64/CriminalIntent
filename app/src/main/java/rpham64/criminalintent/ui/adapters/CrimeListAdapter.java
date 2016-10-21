@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui.adapters;
+package rpham64.criminalintent.ui.adapters;
 
 /**
  * Created by Rudolf on 10/9/2016.
@@ -15,10 +15,10 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import bignerdranch.criminalintent.R;
-import bignerdranch.criminalintent.models.Crime;
-import bignerdranch.criminalintent.models.CrimeLab;
-import bignerdranch.criminalintent.ui.CrimePagerActivity;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.CrimePagerActivity;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

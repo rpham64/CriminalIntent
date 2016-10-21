@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui;
+package rpham64.criminalintent.ui;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -13,7 +13,7 @@ import android.widget.TimePicker;
 import java.util.Calendar;
 import java.util.Date;
 
-import bignerdranch.criminalintent.R;
+import rpham64.criminalintent.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;

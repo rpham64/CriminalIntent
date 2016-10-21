@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui;
+package rpham64.criminalintent.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,12 +13,12 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import bignerdranch.criminalintent.BaseFragment;
-import bignerdranch.criminalintent.R;
-import bignerdranch.criminalintent.models.Crime;
-import bignerdranch.criminalintent.models.CrimeLab;
-import bignerdranch.criminalintent.ui.adapters.CrimeListAdapter;
-import bignerdranch.criminalintent.ui.views.EmptyRecyclerView;
+import rpham64.criminalintent.BaseFragment;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.adapters.CrimeListAdapter;
+import rpham64.criminalintent.ui.views.EmptyRecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;

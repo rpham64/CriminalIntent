@@ -1,12 +1,10 @@
-package bignerdranch.criminalintent;
+package rpham64.criminalintent;
 
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-
-import bignerdranch.criminalintent.R;
 
 /**
  * Superclass for CriminalIntent's activities

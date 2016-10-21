@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.models;
+package rpham64.criminalintent.models;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.models.database.CrimeBaseHelper;
-import bignerdranch.criminalintent.models.database.CrimeCursorWrapper;
-import bignerdranch.criminalintent.models.database.CrimeDbSchema.CrimeTable;
+import rpham64.criminalintent.models.database.CrimeBaseHelper;
+import rpham64.criminalintent.models.database.CrimeCursorWrapper;
+import rpham64.criminalintent.models.database.CrimeDbSchema.CrimeTable;
 
 /**
  * Singleton to hold Crime data

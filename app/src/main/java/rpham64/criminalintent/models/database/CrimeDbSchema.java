@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.models.database;
+package rpham64.criminalintent.models.database;
 
 /**
  * Database Schema implementation for SQLite Databases (Ch. 14)

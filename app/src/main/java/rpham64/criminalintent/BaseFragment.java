@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package rpham64.criminalintent;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui.adapters;
+package rpham64.criminalintent.ui.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -6,8 +6,8 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 
 import java.util.List;
 
-import bignerdranch.criminalintent.models.Crime;
-import bignerdranch.criminalintent.ui.CrimeFragment;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.ui.CrimeFragment;
 
 /**
  * Created by Rudolf on 10/9/2016.

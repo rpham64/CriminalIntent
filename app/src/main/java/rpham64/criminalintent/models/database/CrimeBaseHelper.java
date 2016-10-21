@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.models.database;
+package rpham64.criminalintent.models.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

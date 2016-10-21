@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package rpham64.criminalintent;
 
 import org.junit.Test;
 

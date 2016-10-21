@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent;
+package rpham64.criminalintent;
 
 /**
  * Created by Rudolf on 10/9/2016.

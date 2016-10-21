@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.utils;
+package rpham64.criminalintent.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

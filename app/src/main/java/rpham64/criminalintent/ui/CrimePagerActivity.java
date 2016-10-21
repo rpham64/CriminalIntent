@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui;
+package rpham64.criminalintent.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,10 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.List;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.R;
-import bignerdranch.criminalintent.models.Crime;
-import bignerdranch.criminalintent.models.CrimeLab;
-import bignerdranch.criminalintent.ui.adapters.CrimePagerAdapter;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.adapters.CrimePagerAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 

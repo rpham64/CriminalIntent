@@ -1,4 +1,4 @@
-package bignerdranch.criminalintent.ui;
+package rpham64.criminalintent.ui;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -43,22 +43,22 @@ import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
-import bignerdranch.criminalintent.BaseFragment;
-import bignerdranch.criminalintent.R;
-import bignerdranch.criminalintent.models.Crime;
-import bignerdranch.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.BaseFragment;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import icepick.State;
 
-import static bignerdranch.criminalintent.Permissions.REQUEST_CONTACT;
-import static bignerdranch.criminalintent.Permissions.REQUEST_DATE;
-import static bignerdranch.criminalintent.Permissions.REQUEST_PHOTO;
-import static bignerdranch.criminalintent.Permissions.REQUEST_TIME;
-import static bignerdranch.criminalintent.utils.TimeUtils.formatDate;
-import static bignerdranch.criminalintent.utils.TimeUtils.formatTime;
+import static rpham64.criminalintent.Permissions.REQUEST_CONTACT;
+import static rpham64.criminalintent.Permissions.REQUEST_DATE;
+import static rpham64.criminalintent.Permissions.REQUEST_PHOTO;
+import static rpham64.criminalintent.Permissions.REQUEST_TIME;
+import static rpham64.criminalintent.utils.TimeUtils.formatDate;
+import static rpham64.criminalintent.utils.TimeUtils.formatTime;
 
 /**
  * Created by Rudolf on 2/8/2016.
