@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.list;
 
 import android.support.v4.app.Fragment;
 

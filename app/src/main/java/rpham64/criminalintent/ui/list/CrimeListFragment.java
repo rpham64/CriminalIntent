@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.list;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,16 +13,18 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import rpham64.criminalintent.BaseFragment;
-import rpham64.criminalintent.R;
-import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.models.CrimeLab;
-import rpham64.criminalintent.ui.adapters.CrimeListAdapter;
-import rpham64.criminalintent.ui.views.EmptyRecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import icepick.State;
+import rpham64.criminalintent.BaseFragment;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.AboutActivity;
+import rpham64.criminalintent.ui.adapters.CrimeListAdapter;
+import rpham64.criminalintent.ui.pages.CrimePagerActivity;
+import rpham64.criminalintent.ui.views.EmptyRecyclerView;
 
 /**
  * Test123
@@ -33,13 +35,12 @@ public class CrimeListFragment extends BaseFragment {
 
     private static final String TAG = CrimeListFragment.class.getName();
 
-    @BindView(R.id.crime_recycler_view)
-    EmptyRecyclerView recyclerView;
-
-    @State boolean isSubtitleVisible;
+    @BindView(R.id.crime_recycler_view) EmptyRecyclerView recyclerView;
 
     private Unbinder mUnbinder;
     private CrimeListAdapter mAdapter;
+
+    @State boolean isSubtitleVisible;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

@@ -3,9 +3,6 @@ package rpham64.criminalintent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import icepick.Icepick;
 
@@ -21,10 +18,9 @@ public class BaseFragment extends Fragment {
         Icepick.saveInstanceState(this, outState);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         Icepick.restoreInstanceState(this, savedInstanceState);
-        return super.onCreateView(inflater, container, savedInstanceState);
     }
 }

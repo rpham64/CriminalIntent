@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.List;
 
 import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.ui.CrimeFragment;
+import rpham64.criminalintent.ui.pages.CrimeFragment;
 
 /**
  * Created by Rudolf on 10/9/2016.

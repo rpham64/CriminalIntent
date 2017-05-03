@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="rpham64.criminalintent.ui.CrimeListActivity">
+        <activity android:name="rpham64.criminalintent.ui.list.CrimeListActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -25,13 +25,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="rpham64.criminalintent.ui.CrimePagerActivity"
+            android:name="rpham64.criminalintent.ui.pages.CrimePagerActivity"
             android:label="@string/app_name"
-            android:parentActivityName="rpham64.criminalintent.ui.CrimeListActivity"/>
+            android:parentActivityName="rpham64.criminalintent.ui.list.CrimeListActivity"/>
         <activity
             android:name="rpham64.criminalintent.ui.AboutActivity"
             android:label="@string/about_my_app"
-            android:parentActivityName="rpham64.criminalintent.ui.CrimeListActivity"
+            android:parentActivityName="rpham64.criminalintent.ui.list.CrimeListActivity"
             android:theme="@style/AboutLibrariesTheme" />
     </application>
 

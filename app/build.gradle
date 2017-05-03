@@ -5,20 +5,21 @@ apply plugin: 'com.neenbedankt.android-apt'
 android {
     signingConfigs {
         release {
-            keyAlias KEY_ALIAS
-            keyPassword KEY_PASSWORD
+            keyAlias 'rpham64'
+            keyPassword 'trekon123'
             storeFile file('C:/Users/Rudolf/Keystores/criminal_intent.jks')
-            storePassword KEYSTORE_PASSWORD
+            storePassword 'trekon123'
         }
     }
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "com.rpham64.android.criminalintent"
         minSdkVersion 16
-        targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 25
+        versionCode 2
+        versionName '1.1'
+        signingConfig signingConfigs.release
     }
     buildTypes {
         release {
@@ -31,6 +32,8 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    productFlavors {
+    }
 }
 
 buildscript {
@@ -40,7 +43,7 @@ buildscript {
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.3.0'
         // replace with the current version of the Android plugin
-        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
         // replace with the current version of the android-apt plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
@@ -54,10 +57,11 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.2.1'
-    compile 'com.android.support:design:24.2.1'
-    compile 'com.android.support:support-v4:24.2.1'
-    compile 'com.android.support:recyclerview-v7:24.2.1'
+    androidTestCompile 'com.android.support:support-annotations:25.3.0'
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:support-v4:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
     // UI
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'

@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.pages;
 
 import android.content.Context;
 import android.content.Intent;

@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.pages;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -8,7 +8,6 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -21,7 +20,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,15 +41,18 @@ import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
-import rpham64.criminalintent.BaseFragment;
-import rpham64.criminalintent.R;
-import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.models.CrimeLab;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import icepick.State;
+import rpham64.criminalintent.BaseFragment;
+import rpham64.criminalintent.R;
+import rpham64.criminalintent.models.Crime;
+import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.DatePickerFragment;
+import rpham64.criminalintent.ui.TimePickerFragment;
+import rpham64.criminalintent.utils.ContactUtils;
 
 import static rpham64.criminalintent.Permissions.REQUEST_CONTACT;
 import static rpham64.criminalintent.Permissions.REQUEST_DATE;
@@ -63,7 +64,7 @@ import static rpham64.criminalintent.utils.TimeUtils.formatTime;
 /**
  * Created by Rudolf on 2/8/2016.
  */
-public class CrimeFragment extends BaseFragment {
+public class CrimeFragment extends BaseFragment implements TextWatcher {
 
     private static final String TAG = CrimeFragment.class.getName();
 
@@ -99,11 +100,11 @@ public class CrimeFragment extends BaseFragment {
      */
     private int mShortAnimationDuration;
 
-    @State String mContactId;
-    @State String mContactNumber;
-
     private Unbinder mUnbinder;
     private PackageManager mPackageManager;
+
+    @State String mSuspectName;
+    @State String mSuspectNumber;
 
     private Uri mContactUri;
     private UUID mCrimeId;
@@ -146,30 +147,16 @@ public class CrimeFragment extends BaseFragment {
         mUnbinder = ButterKnife.bind(this, view);
 
         etxtTitle.setText(mCrime.getTitle());
+        etxtTitle.addTextChangedListener(this);
+
         chkBoxSolved.setChecked(mCrime.isSolved());
+        btnCallSuspect.setEnabled(mSuspectNumber != null);
 
         updateDate();
         updateTime();
         setPhoto();
         setPhotoButton();
         setSuspect();
-
-        etxtTitle.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Nothing here
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                mCrime.setTitle(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // Nothing here
-            }
-        });
 
         return view;
     }
@@ -178,18 +165,6 @@ public class CrimeFragment extends BaseFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_crime, menu);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        CrimeLab.get(getActivity()).updateCrime(mCrime);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
     }
 
     @Override
@@ -210,6 +185,18 @@ public class CrimeFragment extends BaseFragment {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
     }
 
     @Override
@@ -253,8 +240,7 @@ public class CrimeFragment extends BaseFragment {
                         && getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
                     requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACT);
                 } else {
-                    getContactName(mContactUri);
-                    getContactNumber(mContactUri);
+                    setSuspectNameAndNumber();
                 }
 
                 break;
@@ -271,14 +257,28 @@ public class CrimeFragment extends BaseFragment {
         if (requestCode == REQUEST_CONTACT && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
             // Permission is granted
-            getContactName(mContactUri);
-            getContactNumber(mContactUri);
+            setSuspectNameAndNumber();
 
         } else {
             String getContactFailedMessage = getString(R.string.permissions_to_retrieve_contact_failed);
             Logger.d(getContactFailedMessage);
             Toast.makeText(getActivity(), getContactFailedMessage, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        mCrime.setTitle(s.toString());
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
     }
 
     private void updateDate() {
@@ -337,6 +337,17 @@ public class CrimeFragment extends BaseFragment {
         }
     }
 
+    private void setSuspectNameAndNumber() {
+        mSuspectName = ContactUtils.getContactName(getContext(), mContactUri);
+        mSuspectNumber = ContactUtils.getContactNumber(getContext(), mContactUri);
+
+        mCrime.setSuspect(mSuspectName);
+        btnSuspectName.setText(mSuspectName);
+
+        // If no phone number, disable call button
+        btnCallSuspect.setEnabled(mSuspectNumber != null);
+    }
+
     private String getCrimeReport() {
 
         String crimeDate = formatDate(mCrime.getDate());
@@ -361,92 +372,6 @@ public class CrimeFragment extends BaseFragment {
 
         return getString(R.string.crime_report, mCrime.getTitle(),
                 crimeDate, isSolved, suspect);
-    }
-
-    private void getContactName(Uri contactUri) {
-
-        // Store field for Contact name
-        String[] queryFields = new String[] {ContactsContract.Contacts.DISPLAY_NAME};
-
-        // Perform query using mContactUri as "whereClause"
-        Cursor cursor = getActivity().getContentResolver()
-                .query(contactUri, queryFields, null, null, null);
-
-        try {
-
-            if (cursor.getCount() == 0) return;
-
-            // Pull out suspect name data from first row, first column
-            cursor.moveToFirst();
-            String suspect = cursor.getString(0);
-            mCrime.setSuspect(suspect);
-            btnSuspectName.setText(suspect);
-
-        } catch (NullPointerException npe) {
-            npe.printStackTrace();
-            Logger.e("Cursor in CrimeFragment is null.");
-
-        } finally {
-            cursor.close();                 // To avoid Cursor exceptions
-        }
-
-        Log.d(TAG, "Contact Name: " + mCrime.getSuspect());
-    }
-
-    private void getContactNumber(Uri contactUri) {
-
-        String selection;
-        String[] selectionArgs;
-
-        // Store field for Contact number
-        String[] queryFields = new String[] {ContactsContract.Contacts._ID};
-
-        // Perform query using mContactUri as "whereClause"
-        Cursor cursorID = getActivity().getContentResolver()
-                .query(contactUri, queryFields, null, null, null);
-
-        try {
-
-            if (cursorID.moveToFirst()) {
-
-                int columnIndex = cursorID.getColumnIndex(ContactsContract.Contacts._ID);
-                mContactId = cursorID.getString(columnIndex);
-
-            }
-
-        } finally {
-            cursorID.close();                 // To avoid Cursor exceptions
-        }
-
-        Log.d(TAG, "Contact ID: " + mContactId);
-
-        // Use mContactId to retrieve contact phone number
-        contactUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        queryFields = new String[] {ContactsContract.CommonDataKinds.Phone.NUMBER};
-        selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ? AND " +
-                ContactsContract.CommonDataKinds.Phone.TYPE + " = " +
-                ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE;
-        selectionArgs = new String[] {mContactId};
-
-        Cursor cursorPhone = getActivity().getContentResolver().query(
-                contactUri, queryFields, selection, selectionArgs, null);
-
-        try {
-
-            if (cursorPhone.moveToFirst()) {
-
-                int columnIndex = cursorPhone.getColumnIndex(
-                        ContactsContract.CommonDataKinds.Phone.NUMBER);
-                mContactNumber = cursorPhone.getString(columnIndex);
-
-            }
-
-        } finally {
-            cursorPhone.close();
-        }
-
-        Log.d(TAG, "Contact Phone Number: " + mContactNumber);
-
     }
 
     /**
@@ -592,7 +517,17 @@ public class CrimeFragment extends BaseFragment {
 
     @OnClick(R.id.crime_camera)
     public void onCameraClicked() {
-        startActivityForResult(mCaptureImage, REQUEST_PHOTO);
+        // If permission not granted, request permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                getActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_PHOTO);
+
+        } else {
+
+            // Permission already granted, so start camera
+            startActivityForResult(mCaptureImage, REQUEST_PHOTO);
+        }
     }
 
     @OnClick(R.id.crime_date)
@@ -627,7 +562,7 @@ public class CrimeFragment extends BaseFragment {
     public void onCallSuspect() {
 
         // Dial contact number using phone app
-        String uri = "tel:" + mContactNumber.trim();
+        String uri = "tel:" + mSuspectNumber.trim();
         Uri number = Uri.parse(uri);
         Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
 
