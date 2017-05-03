@@ -18,23 +18,17 @@
             android:layout_height="80dp"
             android:scaleType="centerInside"
             android:background="@android:color/darker_gray"
-            android:cropToPadding="true"/>
+            android:cropToPadding="true"
+            />
 
         <ImageButton
             android:id="@+id/crime_camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_camera"/>
+            android:src="@android:drawable/ic_menu_camera"
+            />
 
     </LinearLayout>
-
-    <!-- This initially-hidden ImageView will hold the expanded/zoomed
-    version of the first ImageButton above. Without transformations,
-    the ImageView takes up the entire screen. -->
-
-    <!-- To achieve the "zoom" animation, this view's bounds are animated
-    from the bounds of the thumbnail button above, to its final laid-out
-    bounds. -->
 
     <LinearLayout
         android:layout_width="wrap_content"

@@ -27,13 +27,11 @@ import rpham64.criminalintent.ui.pages.CrimePagerActivity;
 import rpham64.criminalintent.ui.views.EmptyRecyclerView;
 
 /**
- * Test123
- *
  * Created by Rudolf on 2/10/2016.
  */
 public class CrimeListFragment extends BaseFragment {
 
-    private static final String TAG = CrimeListFragment.class.getName();
+    public static final String TAG = CrimeListFragment.class.getName();
 
     @BindView(R.id.crime_recycler_view) EmptyRecyclerView recyclerView;
 

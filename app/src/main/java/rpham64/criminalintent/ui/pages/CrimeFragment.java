@@ -1,15 +1,9 @@
 package rpham64.criminalintent.ui.pages;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -26,7 +21,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -47,6 +41,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import icepick.State;
 import rpham64.criminalintent.BaseFragment;
+import rpham64.criminalintent.BuildConfig;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
 import rpham64.criminalintent.models.CrimeLab;
@@ -66,7 +61,9 @@ import static rpham64.criminalintent.utils.TimeUtils.formatTime;
  */
 public class CrimeFragment extends BaseFragment implements TextWatcher {
 
-    private static final String TAG = CrimeFragment.class.getName();
+    public static final String TAG = CrimeFragment.class.getName();
+
+    private static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".provider";
 
     interface Extras {
         String crimeId = "CrimeFragment.crimeId";
@@ -88,17 +85,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     @BindView(R.id.crime_suspect) Button btnSuspectName;
     @BindView(R.id.crime_call_suspect) Button btnCallSuspect;
     @BindView(R.id.crime_report) Button btnReport;
-
-    /**
-     * Hold a reference to the current animator, so that it can be canceled mid-way.
-     */
-    private Animator mCurrentAnimator;
-
-    /**
-     * The system "short" animation time duration, in milliseconds. This duration is ideal for
-     * subtle animations or animations that occur very frequently.
-     */
-    private int mShortAnimationDuration;
 
     private Unbinder mUnbinder;
     private PackageManager mPackageManager;
@@ -136,14 +122,11 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
         mPackageManager = getActivity().getPackageManager();
         mCaptureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_crime, container, false);
+        View view = inflater.inflate(R.layout.view_fragment_crime, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
         etxtTitle.setText(mCrime.getTitle());
@@ -155,7 +138,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
         updateDate();
         updateTime();
         setPhoto();
-        setPhotoButton();
+//        setPhotoButton();
         setSuspect();
 
         return view;
@@ -254,15 +237,34 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CONTACT && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            // Permission is granted
-            setSuspectNameAndNumber();
+        switch (requestCode) {
 
-        } else {
-            String getContactFailedMessage = getString(R.string.permissions_to_retrieve_contact_failed);
-            Logger.d(getContactFailedMessage);
-            Toast.makeText(getActivity(), getContactFailedMessage, Toast.LENGTH_SHORT).show();
+            case REQUEST_CONTACT:
+
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Permission granted to retrieve contact
+                    setSuspectNameAndNumber();
+                } else {
+                    String getContactFailedMessage = getString(R.string.permissions_to_retrieve_contact_failed);
+                    Logger.d(getContactFailedMessage);
+                    Toast.makeText(getActivity(), getContactFailedMessage, Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+
+            case REQUEST_PHOTO:
+
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Permission granted to use camera
+                    startCamera();
+
+                } else {
+                    Toast.makeText(getActivity(), R.string.permissions_camera_must_be_granted, Toast.LENGTH_SHORT).show();
+                }
+
         }
     }
 
@@ -292,17 +294,21 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     }
 
     private void setPhoto() {
-        Picasso.with(getActivity())
-                .load(new File(mPhotoFile.getPath()))
-                .fit()
-                .centerCrop()
-                .placeholder(null)
-                .into(imgPhoto);
 
-        Picasso.with(getActivity())
-                .load(new File(mPhotoFile.getAbsolutePath()))
-                .placeholder(null)
-                .into(imgZoom);
+        if (mPhotoFile != null) {
+            Picasso.with(getActivity())
+                    .load(new File(mPhotoFile.getPath()))
+                    .fit()
+                    .centerCrop()
+                    .placeholder(null)
+                    .into(imgPhoto);
+
+            Picasso.with(getActivity())
+                    .load(new File(mPhotoFile.getAbsolutePath()))
+                    .placeholder(null)
+                    .into(imgZoom);
+        }
+
     }
 
     private void setPhotoButton() {
@@ -312,11 +318,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
         // Disable camera button if canTakePhoto is false. Else, set enabled.
         btnCamera.setEnabled(canTakePhoto);
-
-        if (canTakePhoto) {
-            Uri uri = Uri.fromFile(mPhotoFile);
-            mCaptureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        }
     }
 
     private void setSuspect() {
@@ -374,145 +375,28 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
                 crimeDate, isSolved, suspect);
     }
 
-    /**
-     * "Zooms" in a thumbnail view by assigning the high resolution image to a hidden "zoomed-in"
-     * image view and animating its bounds to fit the entire activity content area. More
-     * specifically:
-     *
-     * <ol>
-     *   <li>Assign the high-res image to the hidden "zoomed-in" (expanded) image view.</li>
-     *   <li>Calculate the starting and ending bounds for the expanded view.</li>
-     *   <li>Animate each of four positioning/sizing properties (X, Y, SCALE_X, SCALE_Y)
-     *       simultaneously, from the starting bounds to the ending bounds.</li>
-     *   <li>Zoom back out by running the reverse animation on click.</li>
-     * </ol>
-     *
-     * @param thumbView  The thumbnail view to zoom in.
-     */
-    private void zoomImageFromThumb(final View thumbView) {
-        // If there's an animation in progress, cancel it immediately and proceed with this one.
-        if (mCurrentAnimator != null) {
-            mCurrentAnimator.cancel();
+    private void startCamera() {
+
+        boolean canTakePhoto = mPhotoFile != null
+                && mCaptureImage.resolveActivity(mPackageManager) != null;
+
+        if (canTakePhoto) {
+
+            Uri uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
+            mCaptureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+            // For api levels 21 and up (lollipop+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mCaptureImage.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            startActivityForResult(mCaptureImage, REQUEST_PHOTO);
         }
-
-        // Calculate the starting and ending bounds for the zoomed-in image. This step
-        // involves lots of math. Yay, math.
-        final Rect startBounds = new Rect();
-        final Rect finalBounds = new Rect();
-        final Point globalOffset = new Point();
-
-        // The start bounds are the global visible rectangle of the thumbnail, and the
-        // final bounds are the global visible rectangle of the container view. Also
-        // set the container view's offset as the origin for the bounds, since that's
-        // the origin for the positioning animation properties (X, Y).
-        thumbView.getGlobalVisibleRect(startBounds);
-        getActivity().findViewById(R.id.fragment_crime_container).getGlobalVisibleRect(finalBounds, globalOffset);
-        startBounds.offset(-globalOffset.x, -globalOffset.y);
-        finalBounds.offset(-globalOffset.x, -globalOffset.y);
-
-        // Adjust the start bounds to be the same aspect ratio as the final bounds using the
-        // "center crop" technique. This prevents undesirable stretching during the animation.
-        // Also calculate the start scaling factor (the end scaling factor is always 1.0).
-        float startScale;
-        if ((float) finalBounds.width() / finalBounds.height()
-                > (float) startBounds.width() / startBounds.height()) {
-            // Extend start bounds horizontally
-            startScale = (float) startBounds.height() / finalBounds.height();
-            float startWidth = startScale * finalBounds.width();
-            float deltaWidth = (startWidth - startBounds.width()) / 2;
-            startBounds.left -= deltaWidth;
-            startBounds.right += deltaWidth;
-        } else {
-            // Extend start bounds vertically
-            startScale = (float) startBounds.width() / finalBounds.width();
-            float startHeight = startScale * finalBounds.height();
-            float deltaHeight = (startHeight - startBounds.height()) / 2;
-            startBounds.top -= deltaHeight;
-            startBounds.bottom += deltaHeight;
-        }
-
-        // Hide the thumbnail and show the zoomed-in view. When the animation begins,
-        // it will position the zoomed-in view in the place of the thumbnail.
-        thumbView.setAlpha(0f);
-        imgZoom.setVisibility(View.VISIBLE);
-
-        // Set the pivot point for SCALE_X and SCALE_Y transformations to the top-left corner of
-        // the zoomed-in view (the default is the center of the view).
-        imgZoom.setPivotX(0f);
-        imgZoom.setPivotY(0f);
-
-        // Construct and run the parallel animation of the four translation and scale properties
-        // (X, Y, SCALE_X, and SCALE_Y).
-        AnimatorSet set = new AnimatorSet();
-        set
-                .play(ObjectAnimator.ofFloat(imgZoom, View.X, startBounds.left,
-                        finalBounds.left))
-                .with(ObjectAnimator.ofFloat(imgZoom, View.Y, startBounds.top,
-                        finalBounds.top))
-                .with(ObjectAnimator.ofFloat(imgZoom, View.SCALE_X, startScale, 1f))
-                .with(ObjectAnimator.ofFloat(imgZoom, View.SCALE_Y, startScale, 1f));
-        set.setDuration(mShortAnimationDuration);
-        set.setInterpolator(new DecelerateInterpolator());
-        set.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mCurrentAnimator = null;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mCurrentAnimator = null;
-            }
-        });
-        set.start();
-        mCurrentAnimator = set;
-
-        // Upon clicking the zoomed-in image, it should zoom back down to the original bounds
-        // and show the thumbnail instead of the expanded image.
-        final float startScaleFinal = startScale;
-        imgZoom.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mCurrentAnimator != null) {
-                    mCurrentAnimator.cancel();
-                }
-
-                // Animate the four positioning/sizing properties in parallel, back to their
-                // original values.
-                AnimatorSet set = new AnimatorSet();
-                set
-                        .play(ObjectAnimator.ofFloat(imgZoom, View.X, startBounds.left))
-                        .with(ObjectAnimator.ofFloat(imgZoom, View.Y, startBounds.top))
-                        .with(ObjectAnimator
-                                .ofFloat(imgZoom, View.SCALE_X, startScaleFinal))
-                        .with(ObjectAnimator
-                                .ofFloat(imgZoom, View.SCALE_Y, startScaleFinal));
-                set.setDuration(mShortAnimationDuration);
-                set.setInterpolator(new DecelerateInterpolator());
-                set.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        imgZoom.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
-                        imgZoom.setVisibility(View.GONE);
-                        mCurrentAnimator = null;
-                    }
-                });
-                set.start();
-                mCurrentAnimator = set;
-            }
-        });
     }
 
     @OnClick(R.id.crime_photo)
     public void onPhotoClicked() {
-        zoomImageFromThumb(imgPhoto);
+//        zoomImageFromThumb(imgPhoto);
     }
 
     @OnClick(R.id.crime_camera)
@@ -526,7 +410,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
         } else {
 
             // Permission already granted, so start camera
-            startActivityForResult(mCaptureImage, REQUEST_PHOTO);
+            startCamera();
         }
     }
 
