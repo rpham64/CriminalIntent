@@ -77,7 +77,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
     @BindView(R.id.crime_title) EditText etxtTitle;
     @BindView(R.id.crime_photo) ImageView imgPhoto;
-    @BindView(R.id.crime_photo_expanded) ImageView imgZoom;
     @BindView(R.id.crime_camera) ImageButton btnCamera;
     @BindView(R.id.crime_date) Button btnDate;
     @BindView(R.id.crime_time) Button btnTime;
@@ -138,7 +137,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
         updateDate();
         updateTime();
         setPhoto();
-//        setPhotoButton();
         setSuspect();
 
         return view;
@@ -302,22 +300,8 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
                     .centerCrop()
                     .placeholder(null)
                     .into(imgPhoto);
-
-            Picasso.with(getActivity())
-                    .load(new File(mPhotoFile.getAbsolutePath()))
-                    .placeholder(null)
-                    .into(imgZoom);
         }
 
-    }
-
-    private void setPhotoButton() {
-
-        boolean canTakePhoto = mPhotoFile != null
-                && mCaptureImage.resolveActivity(mPackageManager) != null;
-
-        // Disable camera button if canTakePhoto is false. Else, set enabled.
-        btnCamera.setEnabled(canTakePhoto);
     }
 
     private void setSuspect() {
@@ -352,24 +336,14 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     private String getCrimeReport() {
 
         String crimeDate = formatDate(mCrime.getDate());
-        String isSolved;
-        String suspect;
 
-        /** isSolved */
-        if (mCrime.isSolved()) {
-            isSolved = getString(R.string.crime_report_solved);
-        } else {
-            isSolved = getString(R.string.crime_report_unsolved);
-        }
+        String isSolved = mCrime.isSolved() ?
+                getString(R.string.crime_report_solved) :
+                getString(R.string.crime_report_unsolved);
 
-        /** suspect */
-        suspect = mCrime.getSuspect();
-
-        if (suspect == null) {
-            suspect = getString(R.string.crime_report_no_suspect);
-        } else {
-            suspect = getString(R.string.crime_report_suspect, suspect);
-        }
+        String suspect = mCrime.getSuspect() == null ?
+                getString(R.string.crime_report_no_suspect) :
+                getString(R.string.crime_report_suspect, mCrime.getSuspect());
 
         return getString(R.string.crime_report, mCrime.getTitle(),
                 crimeDate, isSolved, suspect);
