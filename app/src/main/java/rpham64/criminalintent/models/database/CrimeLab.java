@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -101,6 +103,28 @@ public class CrimeLab {
 
     }
 
+    /**
+     * Finds the directory for storing pictures
+     *
+     * @param crime
+     * @return File object that points to the right location
+     */
+    public File getPhotoFile(Context context, String fileName) {
+
+        // Get reference to external files directory for pictures
+        File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        // Check: If there exists an external storage to save the pictures
+        if (externalFilesDir == null) return null;
+
+        return new File(externalFilesDir, fileName);
+    }
+
+    /**
+     * Updates Crime in database
+     *
+     * @param crime
+     */
     public void updateCrime(Crime crime) {
 
         String uuidString = crime.getId().toString();

@@ -109,8 +109,10 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         }
 
         Crime crime = CrimeLab.get(getActivity()).getCrime(crimeId);
+        File photoFile = CrimeLab.get(getActivity()).getPhotoFile(getActivity(), crime.getPhotoFilename());
 
         mPresenter = new CrimePresenter(crime);
+        mPresenter.setPhotoFile(photoFile);
     }
 
     @Override
@@ -121,7 +123,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
         etxtTitle.addTextChangedListener(this);
 
-        mPresenter.setPhoto();
+        mPresenter.setPhotoView();
         mPresenter.updateTitle();
         mPresenter.updateDate();
         mPresenter.updateTime();
@@ -243,7 +245,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
             case (REQUEST_PHOTO):
 
-                mPresenter.setPhoto();
+                mPresenter.setPhotoView();
 
         }
 
@@ -305,7 +307,8 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     @Override
     public void startCamera() {
 
-        File photoFile = mPresenter.getPhotoFile();
+        // TODO: Fix this hack
+        File photoFile = CrimeLab.get(getActivity()).getPhotoFile(getActivity(), mPresenter.getPhotoFileName());
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         boolean canTakePhoto = photoFile != null

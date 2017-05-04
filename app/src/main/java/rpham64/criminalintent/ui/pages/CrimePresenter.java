@@ -35,13 +35,7 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
 
     @Override
     public File getPhotoFile() {
-        File photoFile = mCrime.getPhotoFile();
-
-        if (photoFile == null) {
-            getView().getPhotoFile(mCrime.getPhotoFilename());
-        }
-
-        return photoFile;
+        return mCrime.getPhotoFile();
     }
 
     @Override
@@ -50,7 +44,12 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
     }
 
     @Override
-    public void setPhoto() {
+    public String getPhotoFileName() {
+        return mCrime.getPhotoFilename();
+    }
+
+    @Override
+    public void setPhotoView() {
         getView().setPhoto(mCrime.getPhotoFile());
     }
 

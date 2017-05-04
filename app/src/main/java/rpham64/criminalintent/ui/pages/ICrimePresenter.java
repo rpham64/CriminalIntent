@@ -17,7 +17,9 @@ public interface ICrimePresenter {
 
     void setPhotoFile(File photoFile);
 
-    void setPhoto();
+    String getPhotoFileName();
+
+    void setPhotoView();
 
     void setTitle(String newTitle);
 
