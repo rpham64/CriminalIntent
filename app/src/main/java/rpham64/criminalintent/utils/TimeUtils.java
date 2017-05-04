@@ -8,7 +8,11 @@ import java.util.Locale;
  * Created by Rudolf on 10/9/2016.
  */
 
-public class TimeUtils {
+public final class TimeUtils {
+
+    private TimeUtils() {
+        // This utility class is not publicly instantiable
+    }
 
     /**
      * Convert Date to String using specified format

@@ -1,4 +1,4 @@
-package rpham64.criminalintent.models;
+package rpham64.criminalintent.models.database;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import rpham64.criminalintent.models.database.CrimeBaseHelper;
-import rpham64.criminalintent.models.database.CrimeCursorWrapper;
+import rpham64.criminalintent.models.Crime;
 import rpham64.criminalintent.models.database.CrimeDbSchema.CrimeTable;
 
 /**

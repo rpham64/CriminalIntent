@@ -16,7 +16,11 @@ import java.lang.reflect.Method;
 /**
  * Created by Rudolf on 3/4/2016.
  */
-public class PictureUtils {
+public final class PictureUtils {
+
+    private PictureUtils() {
+        // This utility class is not publicly instantiable
+    }
 
     /**
      * Scales bitmap to the given Activity's size

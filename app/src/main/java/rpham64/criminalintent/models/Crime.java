@@ -1,5 +1,6 @@
 package rpham64.criminalintent.models;
 
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 public class Crime {
 
     private UUID mId;                   // Unique crime ID
+    private File mPhotoFile;
     private String mTitle;              // Crime Title
     private Date mDate;                 // Date of Crime
     private boolean mSolved;            // Crime solved or not
@@ -29,6 +31,14 @@ public class Crime {
 
     public UUID getId() {
         return mId;
+    }
+
+    public File getPhotoFile() {
+        return mPhotoFile;
+    }
+
+    public void setPhotoFile(File photoFile) {
+        mPhotoFile = photoFile;
     }
 
     public String getTitle() {

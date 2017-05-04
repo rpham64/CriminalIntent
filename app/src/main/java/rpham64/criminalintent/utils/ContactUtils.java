@@ -11,7 +11,11 @@ import com.orhanobut.logger.Logger;
  * Created by Rudolf on 5/2/2017.
  */
 
-public class ContactUtils {
+public final class ContactUtils {
+
+    private ContactUtils() {
+        // This utility class is not publicly instantiable
+    }
 
     public static String getContactName(Context context, Uri contactUri) {
 

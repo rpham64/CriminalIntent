@@ -20,7 +20,7 @@ import icepick.State;
 import rpham64.criminalintent.ui.BaseFragment;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.models.database.CrimeLab;
 import rpham64.criminalintent.ui.AboutActivity;
 import rpham64.criminalintent.ui.adapters.CrimeListAdapter;
 import rpham64.criminalintent.ui.pages.CrimePagerActivity;

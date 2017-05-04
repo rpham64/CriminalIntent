@@ -4,7 +4,7 @@ package rpham64.criminalintent.utils;
  * Created by Rudolf on 10/9/2016.
  */
 
-public class Permissions {
+public final class Permissions {
 
     public static final int REQUEST_DATE = 0;
     public static final int REQUEST_TIME = 1;

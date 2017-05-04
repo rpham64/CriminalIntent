@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.models.database.CrimeLab;
 import rpham64.criminalintent.ui.adapters.CrimePagerAdapter;
 import butterknife.BindView;
 import butterknife.ButterKnife;

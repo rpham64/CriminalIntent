@@ -13,7 +13,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ShareCompat;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -41,11 +40,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import icepick.State;
 import rpham64.criminalintent.BuildConfig;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.models.database.CrimeLab;
 import rpham64.criminalintent.ui.BaseFragment;
 import rpham64.criminalintent.ui.DatePickerFragment;
 import rpham64.criminalintent.ui.TimePickerFragment;
@@ -57,7 +55,6 @@ import static rpham64.criminalintent.utils.Permissions.REQUEST_CONTACT;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_DATE;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_PHOTO;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_TIME;
-import static rpham64.criminalintent.utils.TimeUtils.formatDate;
 
 /**
  * Created by Rudolf on 2/8/2016.
@@ -70,7 +67,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     interface Extras {
         String crimeId = "CrimeFragment.crimeId";
-        String contactNumber = "CrimeFragment.mContactNumber";
     }
 
     interface Tags {
@@ -90,10 +86,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     private Unbinder mUnbinder;
     private CrimePresenter mPresenter;
-    private PackageManager mPackageManager;
-
-    private Uri mContactUri;
-    private Intent mCameraIntent;
 
     public static CrimeFragment newInstance(UUID crimeId) {
 
@@ -119,9 +111,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         Crime crime = CrimeLab.get(getActivity()).getCrime(crimeId);
 
         mPresenter = new CrimePresenter(crime);
-
-        mPackageManager = getActivity().getPackageManager();
-        mCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     }
 
     @Override
@@ -132,14 +121,13 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
         etxtTitle.addTextChangedListener(this);
 
+        mPresenter.setPhoto();
         mPresenter.updateTitle();
         mPresenter.updateDate();
         mPresenter.updateTime();
         mPresenter.setSolvedCheckBox();
+        mPresenter.setButtonSuspect();
         mPresenter.setCallButtonEnabled();
-
-        setPhoto();
-        setSuspect();
 
         return view;
     }
@@ -158,7 +146,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             case (R.id.menu_item_delete_crime):
 
                 // Remove crime from CrimeLab
-                CrimeLab.get(getActivity()).deleteCrime(mCrime);
+                mPresenter.deleteCrime();
                 Toast.makeText(getActivity(), R.string.toast_crime_deleted, Toast.LENGTH_SHORT).show();
 
                 getActivity().finish();
@@ -173,14 +161,48 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     @Override
     public void onPause() {
         super.onPause();
-        CrimeLab.get(getActivity()).updateCrime(mCrime);
+        mPresenter.updateCrime();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mUnbinder.unbind();
         mPresenter.detachView();
+        mUnbinder.unbind();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+
+            case REQUEST_CONTACT:
+
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Permission granted to retrieve contact
+                    IntentUtils.pickContact(this);
+
+                } else {
+                    String getContactFailedMessage = getString(R.string.permissions_to_retrieve_contact_failed);
+                    Logger.d(getContactFailedMessage);
+                    Toast.makeText(getActivity(), getContactFailedMessage, Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+
+            case REQUEST_PHOTO:
+
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // Permission granted to use camera
+                    startCamera();
+
+                } else {
+                    Toast.makeText(getActivity(), R.string.permissions_camera_must_be_granted, Toast.LENGTH_SHORT).show();
+                }
+
+        }
     }
 
     @Override
@@ -210,58 +232,53 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
                 // Check: data is null
                 if (data == null) return;
 
-                mContactUri = data.getData();
+                Uri contactUri = data.getData();
 
-                // Check the SDK version and whether the permission is already granted or not.
-                // If version Marshmallow (6.0) or higher, request permission
-                // Else, retrieve contact info (permission already granted)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                        && getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-                    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACT);
-                } else {
-                    setSuspectNameAndNumber();
-                }
+                String suspect = ContactUtils.getContactName(getContext(), contactUri);
+                String number = ContactUtils.getContactNumber(getContext(), contactUri);
+
+                mPresenter.setSuspectInfo(suspect, number);
 
                 break;
 
             case (REQUEST_PHOTO):
 
-                setPhoto();
+                mPresenter.setPhoto();
 
         }
 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void deleteCrime(Crime crime) {
+        CrimeLab.get(getActivity()).deleteCrime(crime);
+    }
 
-        switch (requestCode) {
+    @Override
+    public void updateCrime(Crime crime) {
+        CrimeLab.get(getActivity()).updateCrime(crime);
+    }
 
-            case REQUEST_CONTACT:
+    @Override
+    public void getPhotoFile(String photoFileName) {
+        // Get reference to external files directory for pictures
+        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        // Check: If there exists an external storage to save the pictures
+        if (externalFilesDir == null) return;
 
-                    // Permission granted to retrieve contact
-                    setSuspectNameAndNumber();
-                } else {
-                    String getContactFailedMessage = getString(R.string.permissions_to_retrieve_contact_failed);
-                    Logger.d(getContactFailedMessage);
-                    Toast.makeText(getActivity(), getContactFailedMessage, Toast.LENGTH_SHORT).show();
-                }
+        mPresenter.setPhotoFile(new File(externalFilesDir, photoFileName));
+    }
 
-                break;
-
-            case REQUEST_PHOTO:
-
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // Permission granted to use camera
-                    startCamera();
-
-                } else {
-                    Toast.makeText(getActivity(), R.string.permissions_camera_must_be_granted, Toast.LENGTH_SHORT).show();
-                }
-
+    @Override
+    public void setPhoto(File photo) {
+        if (photo != null) {
+            Picasso.with(getActivity())
+                    .load(photo)
+                    .fit()
+                    .centerCrop()
+                    .placeholder(null)
+                    .into(imgPhoto);
         }
     }
 
@@ -287,8 +304,12 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     @Override
     public void startCamera() {
-        boolean canTakePhoto = mPhotoFile != null
-                && mCameraIntent.resolveActivity(mPackageManager) != null;
+
+        File photoFile = mPresenter.getPhotoFile();
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        boolean canTakePhoto = photoFile != null
+                && cameraIntent.resolveActivity(getActivity().getPackageManager()) != null;
 
         if (canTakePhoto) {
 
@@ -297,19 +318,19 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             // Android api level 24 (Nougat) requires FileProvider for creating a Uri
             // For levels 23 and below, use Uri.fromFile
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
+                uri = FileProvider.getUriForFile(getContext(), AUTHORITY, photoFile);
             } else {
-                uri = Uri.fromFile(mPhotoFile);
+                uri = Uri.fromFile(photoFile);
             }
 
             // For api levels 21 and up (lollipop+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
-            mCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
-            startActivityForResult(mCameraIntent, REQUEST_PHOTO);
+            startActivityForResult(cameraIntent, REQUEST_PHOTO);
         }
     }
 
@@ -346,9 +367,35 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     @Override
     public void findSuspect() {
+
+        // Request permission to search contacts
+        // Else, if already granted, launch contacts application
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && getActivity().checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACT);
+
+        } else {
+            IntentUtils.pickContact(this);
+        }
+
+    }
+
+    @Override
+    public void updateButtonSuspect(String suspect) {
+
+        // Create Implicit Intent with action PICK and location Content URI
         final Intent pickContact = new Intent(Intent.ACTION_PICK,
                 ContactsContract.Contacts.CONTENT_URI);
-        startActivityForResult(pickContact, REQUEST_CONTACT);
+
+        // If no contact app exists, disable Suspect button
+        PackageManager packageManager = getActivity().getPackageManager();
+
+        if (packageManager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            btnSuspectName.setEnabled(false);
+        }
+
+        if (suspect != null) btnSuspectName.setText(suspect);
     }
 
     @Override
@@ -358,7 +405,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     @Override
     public void startCall(String phoneNumber) {
-
         // Dial contact number using phone app
         String uri = "tel:" + phoneNumber.trim();
         Uri number = Uri.parse(uri);
@@ -388,59 +434,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
                 getString(R.string.crime_report_suspect, suspect);
 
         return getString(R.string.crime_report, title, date, solvedText, suspectText);
-    }
-
-    public File getPhotoFile(Crime crime) {
-
-        // Get reference to external files directory for pictures
-        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        // Check: If there exists an external storage to save the pictures
-        if (externalFilesDir == null) return null;
-
-        return new File(externalFilesDir, crime.getPhotoFilename());
-    }
-
-    private void setPhoto() {
-
-        if (mPhotoFile != null) {
-            Picasso.with(getActivity())
-                    .load(mPhotoFile)
-                    .fit()
-                    .centerCrop()
-                    .placeholder(null)
-                    .into(imgPhoto);
-        }
-
-    }
-
-    private void setSuspect() {
-
-        // Create Implicit Intent with action PICK and location Content URI
-        final Intent pickContact = new Intent(Intent.ACTION_PICK,
-                ContactsContract.Contacts.CONTENT_URI);
-
-        // Set text of Suspect Button to suspect, if it exists
-        if (mCrime.getSuspect() != null) {
-            btnSuspectName.setText(mCrime.getSuspect());
-        }
-
-        // If no contact app exists, disable Suspect button
-        if (mPackageManager.resolveActivity(pickContact,
-                mPackageManager.MATCH_DEFAULT_ONLY) == null) {
-            btnSuspectName.setEnabled(false);
-        }
-    }
-
-    private void setSuspectNameAndNumber() {
-        mSuspectName = ContactUtils.getContactName(getContext(), mContactUri);
-        mSuspectNumber = ContactUtils.getContactNumber(getContext(), mContactUri);
-
-        mCrime.setSuspect(mSuspectName);
-        btnSuspectName.setText(mSuspectName);
-
-        // If no phone number, disable call button
-        btnCallSuspect.setEnabled(mSuspectNumber != null);
     }
 
     @OnClick(R.id.crime_photo)
