@@ -1,4 +1,4 @@
-package rpham64.criminalintent;
+package rpham64.criminalintent.utils;
 
 /**
  * Created by Rudolf on 10/9/2016.

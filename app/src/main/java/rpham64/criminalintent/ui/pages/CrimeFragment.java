@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.FileProvider;
@@ -40,26 +41,27 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import icepick.State;
-import rpham64.criminalintent.BaseFragment;
 import rpham64.criminalintent.BuildConfig;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
 import rpham64.criminalintent.models.CrimeLab;
+import rpham64.criminalintent.ui.BaseFragment;
 import rpham64.criminalintent.ui.DatePickerFragment;
 import rpham64.criminalintent.ui.TimePickerFragment;
+import rpham64.criminalintent.ui.imageView.PhotoViewActivity;
 import rpham64.criminalintent.utils.ContactUtils;
 
-import static rpham64.criminalintent.Permissions.REQUEST_CONTACT;
-import static rpham64.criminalintent.Permissions.REQUEST_DATE;
-import static rpham64.criminalintent.Permissions.REQUEST_PHOTO;
-import static rpham64.criminalintent.Permissions.REQUEST_TIME;
+import static rpham64.criminalintent.utils.Permissions.REQUEST_CONTACT;
+import static rpham64.criminalintent.utils.Permissions.REQUEST_DATE;
+import static rpham64.criminalintent.utils.Permissions.REQUEST_PHOTO;
+import static rpham64.criminalintent.utils.Permissions.REQUEST_TIME;
 import static rpham64.criminalintent.utils.TimeUtils.formatDate;
 import static rpham64.criminalintent.utils.TimeUtils.formatTime;
 
 /**
  * Created by Rudolf on 2/8/2016.
  */
-public class CrimeFragment extends BaseFragment implements TextWatcher {
+public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePresenter.View {
 
     public static final String TAG = CrimeFragment.class.getName();
 
@@ -86,16 +88,16 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     @BindView(R.id.crime_report) Button btnReport;
 
     private Unbinder mUnbinder;
+    private CrimePresenter mPresenter;
     private PackageManager mPackageManager;
 
     @State String mSuspectName;
     @State String mSuspectNumber;
 
-    private Uri mContactUri;
-    private UUID mCrimeId;
     private Crime mCrime;
+    private Uri mContactUri;
     private File mPhotoFile;
-    private Intent mCaptureImage;
+    private Intent mCameraIntent;
 
     public static CrimeFragment newInstance(UUID crimeId) {
 
@@ -113,20 +115,22 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
         setHasOptionsMenu(true);
 
         if (getArguments() != null) {
-            mCrimeId = (UUID) getArguments().getSerializable(Extras.crimeId);
+            UUID crimeId = (UUID) getArguments().getSerializable(Extras.crimeId);
+            mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
         }
 
-        mCrime = CrimeLab.get(getActivity()).getCrime(mCrimeId);
         mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
 
+        mPresenter = new CrimePresenter();
         mPackageManager = getActivity().getPackageManager();
-        mCaptureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        mCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.view_fragment_crime, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+        mPresenter.attachView(this);
 
         etxtTitle.setText(mCrime.getTitle());
         etxtTitle.addTextChangedListener(this);
@@ -178,6 +182,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
+        mPresenter.detachView();
     }
 
     @Override
@@ -227,6 +232,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
                 break;
 
             case (REQUEST_PHOTO):
+
                 setPhoto();
 
         }
@@ -295,7 +301,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
         if (mPhotoFile != null) {
             Picasso.with(getActivity())
-                    .load(new File(mPhotoFile.getPath()))
+                    .load(mPhotoFile)
                     .fit()
                     .centerCrop()
                     .placeholder(null)
@@ -352,25 +358,98 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
     private void startCamera() {
 
         boolean canTakePhoto = mPhotoFile != null
-                && mCaptureImage.resolveActivity(mPackageManager) != null;
+                && mCameraIntent.resolveActivity(mPackageManager) != null;
 
         if (canTakePhoto) {
 
-            Uri uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
-            mCaptureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            Uri uri;
+
+            // Android api level 24 (Nougat) requires FileProvider for creating a Uri
+            // For levels 23 and below, use Uri.fromFile
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
+            } else {
+                uri = Uri.fromFile(mPhotoFile);
+            }
 
             // For api levels 21 and up (lollipop+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mCaptureImage.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                mCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
-            startActivityForResult(mCaptureImage, REQUEST_PHOTO);
+            mCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+            startActivityForResult(mCameraIntent, REQUEST_PHOTO);
         }
+    }
+
+    @Override
+    public void showDateDialog(Date date) {
+        FragmentManager fragmentManager = getFragmentManager();
+        DatePickerFragment dialogDate = DatePickerFragment.newInstance(date);
+        dialogDate.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+        dialogDate.show(fragmentManager, Tags.dialogDate);
+    }
+
+    @Override
+    public void showTimeDialog(Date time) {
+        FragmentManager fragmentManager = getFragmentManager();
+        TimePickerFragment dialogTime = TimePickerFragment.newInstance(time);
+        dialogTime.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+        dialogTime.show(fragmentManager, Tags.dialogTime);
+    }
+
+    @Override
+    public void setSolved(boolean isSolved) {
+        mCrime.setSolved(isSolved);
+    }
+
+    @Override
+    public void findSuspect() {
+        final Intent pickContact = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(pickContact, REQUEST_CONTACT);
+    }
+
+    @Override
+    public void startCall() {
+
+        // Dial contact number using phone app
+        String uri = "tel:" + mSuspectNumber.trim();
+        Uri number = Uri.parse(uri);
+        Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
+
+        startActivity(callNumber);
+    }
+
+    @Override
+    public void sendCrimeReport() {
+        // Build Intent using ShareCompat.IntentBuilder
+        ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
+
+        intentBuilder.setChooserTitle(R.string.send_report)
+                .setType("text/plain")
+                .setSubject(getString(R.string.crime_report_subject))
+                .setText(getCrimeReport());
+
+        // Create chooser intent and send to OS
+        Intent intent = Intent.createChooser(
+                intentBuilder.getIntent(),
+                getString(R.string.send_report));
+
+        startActivity(intent);
     }
 
     @OnClick(R.id.crime_photo)
     public void onPhotoClicked() {
-//        zoomImageFromThumb(imgPhoto);
+        if (Build.VERSION.SDK_INT < 21) {
+            Toast.makeText(getContext(), "21+ only, keep out", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(getContext(), PhotoViewActivity.class);
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(getActivity(), imgPhoto, getString(R.string.view_photo_in_full_screen));
+            startActivity(intent, options.toBundle());
+        }
     }
 
     @OnClick(R.id.crime_camera)
@@ -390,58 +469,31 @@ public class CrimeFragment extends BaseFragment implements TextWatcher {
 
     @OnClick(R.id.crime_date)
     public void onDateClicked() {
-        FragmentManager fragmentManager = getFragmentManager();
-        DatePickerFragment dialogDate = DatePickerFragment.newInstance(mCrime.getDate());
-        dialogDate.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-        dialogDate.show(fragmentManager, Tags.dialogDate);
+        mPresenter.onDateButtonClicked(mCrime.getDate());
     }
 
     @OnClick(R.id.crime_time)
     public void onTimeClicked() {
-        FragmentManager fragmentManager = getFragmentManager();
-        TimePickerFragment dialogTime = TimePickerFragment.newInstance(mCrime.getDate());
-        dialogTime.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
-        dialogTime.show(fragmentManager, Tags.dialogTime);
+        mPresenter.onTimeButtonClicked(mCrime.getDate());
     }
 
     @OnClick(R.id.crime_solved)
-    public void onSolvedChecked() {
-        mCrime.setSolved(chkBoxSolved.isChecked());
+    public void onSolvedButtonChecked() {
+        mPresenter.onSolvedButtonChecked(chkBoxSolved.isChecked());
     }
 
     @OnClick(R.id.crime_suspect)
-    public void onSuspectClicked() {
-        final Intent pickContact = new Intent(Intent.ACTION_PICK,
-                ContactsContract.Contacts.CONTENT_URI);
-        startActivityForResult(pickContact, REQUEST_CONTACT);
+    public void onSuspectButtonClicked() {
+        mPresenter.onSuspectButtonClicked();
     }
 
     @OnClick(R.id.crime_call_suspect)
     public void onCallSuspect() {
-
-        // Dial contact number using phone app
-        String uri = "tel:" + mSuspectNumber.trim();
-        Uri number = Uri.parse(uri);
-        Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
-
-        startActivity(callNumber);
+        mPresenter.onCallButtonClicked();
     }
 
     @OnClick(R.id.crime_report)
     public void onReportClicked() {
-        // Build Intent using ShareCompat.IntentBuilder
-        ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
-
-        intentBuilder.setChooserTitle(R.string.send_report)
-                .setType("text/plain")
-                .setSubject(getString(R.string.crime_report_subject))
-                .setText(getCrimeReport());
-
-        // Create chooser intent and send to OS
-        Intent intent = Intent.createChooser(
-                intentBuilder.getIntent(),
-                getString(R.string.send_report));
-
-        startActivity(intent);
+        mPresenter.onSendCrimeReportButtonClicked();
     }
 }

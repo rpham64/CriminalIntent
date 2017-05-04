@@ -1,4 +1,4 @@
-package rpham64.criminalintent;
+package rpham64.criminalintent.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

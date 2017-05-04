@@ -38,6 +38,7 @@
     <string name="permissions_to_retrieve_contact_failed">Until permissions are granted, we cannot display the names</string>
     <string name="about_my_app">About My App</string>
     <string name="permissions_camera_must_be_granted">Camera permissions must be granted before accessing the camera.</string>
+    <string name="view_photo_in_full_screen">view photo in full screen</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s crime</item>
