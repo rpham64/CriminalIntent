@@ -13,6 +13,7 @@ public class Crime {
     private Date mDate;                 // Date of Crime
     private boolean mSolved;            // Crime solved or not
     private String mSuspect;            // Name of suspect
+    private String mNumber;
 
     /**
      * Construct Crime with random UUID
@@ -60,6 +61,14 @@ public class Crime {
 
     public void setSuspect(String suspect) {
         mSuspect = suspect;
+    }
+
+    public String getNumber() {
+        return mNumber;
+    }
+
+    public void setNumber(String number) {
+        mNumber = number;
     }
 
     /**

@@ -51,13 +51,13 @@ import rpham64.criminalintent.ui.DatePickerFragment;
 import rpham64.criminalintent.ui.TimePickerFragment;
 import rpham64.criminalintent.ui.imageView.PhotoViewActivity;
 import rpham64.criminalintent.utils.ContactUtils;
+import rpham64.criminalintent.utils.IntentUtils;
 
 import static rpham64.criminalintent.utils.Permissions.REQUEST_CONTACT;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_DATE;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_PHOTO;
 import static rpham64.criminalintent.utils.Permissions.REQUEST_TIME;
 import static rpham64.criminalintent.utils.TimeUtils.formatDate;
-import static rpham64.criminalintent.utils.TimeUtils.formatTime;
 
 /**
  * Created by Rudolf on 2/8/2016.
@@ -92,12 +92,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     private CrimePresenter mPresenter;
     private PackageManager mPackageManager;
 
-    @State String mSuspectName;
-    @State String mSuspectNumber;
-
-    private Crime mCrime;
     private Uri mContactUri;
-    private File mPhotoFile;
     private Intent mCameraIntent;
 
     public static CrimeFragment newInstance(UUID crimeId) {
@@ -115,14 +110,16 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        UUID crimeId = null;
+
         if (getArguments() != null) {
-            UUID crimeId = (UUID) getArguments().getSerializable(Extras.crimeId);
-            mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+            crimeId = (UUID) getArguments().getSerializable(Extras.crimeId);
         }
 
-        mPhotoFile = getPhotoFile(mCrime);
+        Crime crime = CrimeLab.get(getActivity()).getCrime(crimeId);
 
-        mPresenter = new CrimePresenter();
+        mPresenter = new CrimePresenter(crime);
+
         mPackageManager = getActivity().getPackageManager();
         mCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     }
@@ -133,14 +130,14 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         mUnbinder = ButterKnife.bind(this, view);
         mPresenter.attachView(this);
 
-        etxtTitle.setText(mCrime.getTitle());
         etxtTitle.addTextChangedListener(this);
 
-        chkBoxSolved.setChecked(mCrime.isSolved());
-        btnCallSuspect.setEnabled(mSuspectNumber != null);
+        mPresenter.updateTitle();
+        mPresenter.updateDate();
+        mPresenter.updateTime();
+        mPresenter.setSolvedCheckBox();
+        mPresenter.setCallButtonEnabled();
 
-        updateDate();
-        updateTime();
         setPhoto();
         setSuspect();
 
@@ -190,7 +187,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Check: resultCode is OK or not
         if (resultCode != Activity.RESULT_OK) return;
 
         switch (requestCode) {
@@ -198,18 +194,14 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             case (REQUEST_DATE):
 
                 Date date = (Date) data.getSerializableExtra(DatePickerFragment.Extras.date);
-                mCrime.setDate(date);
-
-                updateDate();
+                mPresenter.setDate(date);
 
                 break;
 
             case (REQUEST_TIME):
 
                 Date time = (Date) data.getSerializableExtra(TimePickerFragment.Extras.time);
-                mCrime.setDate(time);
-
-                updateTime();
+                mPresenter.setTime(time);
 
                 break;
 
@@ -274,18 +266,51 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     }
 
     @Override
+    public void updateEditTextTitle(String title) {
+        etxtTitle.setText(title);
+    }
+
+    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
     }
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        mCrime.setTitle(s.toString());
+        mPresenter.setTitle(s.toString());
     }
 
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @Override
+    public void startCamera() {
+        boolean canTakePhoto = mPhotoFile != null
+                && mCameraIntent.resolveActivity(mPackageManager) != null;
+
+        if (canTakePhoto) {
+
+            Uri uri;
+
+            // Android api level 24 (Nougat) requires FileProvider for creating a Uri
+            // For levels 23 and below, use Uri.fromFile
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
+            } else {
+                uri = Uri.fromFile(mPhotoFile);
+            }
+
+            // For api levels 21 and up (lollipop+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                mCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            mCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+            startActivityForResult(mCameraIntent, REQUEST_PHOTO);
+        }
     }
 
     @Override
@@ -305,8 +330,18 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     }
 
     @Override
-    public void setSolved(boolean isSolved) {
-        mCrime.setSolved(isSolved);
+    public void updateButtonDate(String date) {
+        btnDate.setText(date);
+    }
+
+    @Override
+    public void updateButtonTime(String time) {
+        btnTime.setText(time);
+    }
+
+    @Override
+    public void setSolvedCheckBox(boolean isSolved) {
+        chkBoxSolved.setChecked(isSolved);
     }
 
     @Override
@@ -317,10 +352,15 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     }
 
     @Override
-    public void startCall() {
+    public void setCallButtonEnabled(boolean isEnabled) {
+        btnCallSuspect.setEnabled(isEnabled);
+    }
+
+    @Override
+    public void startCall(String phoneNumber) {
 
         // Dial contact number using phone app
-        String uri = "tel:" + mSuspectNumber.trim();
+        String uri = "tel:" + phoneNumber.trim();
         Uri number = Uri.parse(uri);
         Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
 
@@ -329,30 +369,25 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     @Override
     public void sendCrimeReport() {
-        // Build Intent using ShareCompat.IntentBuilder
-        ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
 
-        intentBuilder.setChooserTitle(R.string.send_report)
-                .setType("text/plain")
-                .setSubject(getString(R.string.crime_report_subject))
-                .setText(getCrimeReport());
+        String crimeReport = mPresenter.getCrimeReport();
 
-        // Create chooser intent and send to OS
-        Intent intent = Intent.createChooser(
-                intentBuilder.getIntent(),
-                getString(R.string.send_report));
-
-        startActivity(intent);
+        Intent crimeReportIntent = IntentUtils.buildCrimeReportIntent(getActivity(), crimeReport);
+        startActivity(crimeReportIntent);
     }
 
-    private void updateDate() {
-        String date = formatDate(mCrime.getDate());
-        btnDate.setText(date);
-    }
+    @Override
+    public String buildCrimeReport(String title, String date, boolean isSolved, boolean hasSuspect, String suspect) {
 
-    private void updateTime() {
-        String time = formatTime(mCrime.getDate());
-        btnTime.setText(time);
+        String solvedText = isSolved ?
+                getString(R.string.crime_report_solved) :
+                getString(R.string.crime_report_unsolved);
+
+        String suspectText = hasSuspect ?
+                getString(R.string.crime_report_no_suspect) :
+                getString(R.string.crime_report_suspect, suspect);
+
+        return getString(R.string.crime_report, title, date, solvedText, suspectText);
     }
 
     public File getPhotoFile(Crime crime) {
@@ -408,50 +443,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         btnCallSuspect.setEnabled(mSuspectNumber != null);
     }
 
-    private String getCrimeReport() {
-
-        String crimeDate = formatDate(mCrime.getDate());
-
-        String isSolved = mCrime.isSolved() ?
-                getString(R.string.crime_report_solved) :
-                getString(R.string.crime_report_unsolved);
-
-        String suspect = mCrime.getSuspect() == null ?
-                getString(R.string.crime_report_no_suspect) :
-                getString(R.string.crime_report_suspect, mCrime.getSuspect());
-
-        return getString(R.string.crime_report, mCrime.getTitle(),
-                crimeDate, isSolved, suspect);
-    }
-
-    private void startCamera() {
-
-        boolean canTakePhoto = mPhotoFile != null
-                && mCameraIntent.resolveActivity(mPackageManager) != null;
-
-        if (canTakePhoto) {
-
-            Uri uri;
-
-            // Android api level 24 (Nougat) requires FileProvider for creating a Uri
-            // For levels 23 and below, use Uri.fromFile
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                uri = FileProvider.getUriForFile(getContext(), AUTHORITY, mPhotoFile);
-            } else {
-                uri = Uri.fromFile(mPhotoFile);
-            }
-
-            // For api levels 21 and up (lollipop+)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                mCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
-
-            mCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-
-            startActivityForResult(mCameraIntent, REQUEST_PHOTO);
-        }
-    }
-
     @OnClick(R.id.crime_photo)
     public void onPhotoClicked() {
         if (Build.VERSION.SDK_INT < 21) {
@@ -475,23 +466,23 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
         } else {
 
             // Permission already granted, so start camera
-            startCamera();
+            mPresenter.onCameraButtonClicked();
         }
     }
 
     @OnClick(R.id.crime_date)
     public void onDateClicked() {
-        mPresenter.onDateButtonClicked(mCrime.getDate());
+        mPresenter.onDateButtonClicked();
     }
 
     @OnClick(R.id.crime_time)
     public void onTimeClicked() {
-        mPresenter.onTimeButtonClicked(mCrime.getDate());
+        mPresenter.onTimeButtonClicked();
     }
 
     @OnClick(R.id.crime_solved)
     public void onSolvedButtonChecked() {
-        mPresenter.onSolvedButtonChecked(chkBoxSolved.isChecked());
+        mPresenter.onSolvedButtonChecked();
     }
 
     @OnClick(R.id.crime_suspect)
