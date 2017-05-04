@@ -144,7 +144,9 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
 
     @Override
     public void onSolvedButtonChecked() {
-        getView().setSolvedCheckBox(mCrime.isSolved());
+        boolean isSolved = mCrime.isSolved();
+        mCrime.setSolved(!isSolved);
+        getView().setSolvedCheckBox(!isSolved);
     }
 
     @Override

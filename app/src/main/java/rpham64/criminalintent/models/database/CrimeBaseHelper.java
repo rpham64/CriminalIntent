@@ -13,8 +13,21 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class CrimeBaseHelper extends SQLiteOpenHelper {
 
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
     private static final String DATABASE_NAME = "crimeBase.db";
+
+    private static final String DATABASE_ON_CREATE =
+            "create table " + CrimeDbSchema.CrimeTable.NAME + "(" +
+            " _id integer primary key autoincrement, " +
+            CrimeDbSchema.CrimeTable.Cols.UUID + ", " +
+            CrimeDbSchema.CrimeTable.Cols.TITLE + ", " +
+            CrimeDbSchema.CrimeTable.Cols.DATE + ", " +
+            CrimeDbSchema.CrimeTable.Cols.SOLVED + ", " +
+            CrimeDbSchema.CrimeTable.Cols.SUSPECT +
+            ")";
+
+    private static final String DATABASE_ADD_COLUMN_NUMBER = "ALTER TABLE " + CrimeDbSchema.CrimeTable.NAME
+            + " ADD COLUMN " + CrimeDbSchema.CrimeTable.Cols.NUMBER + " TEXT;";
 
     private static CrimeBaseHelper sInstance;
 
@@ -24,18 +37,7 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
-        // Create CrimeTable in SQLite
-        db.execSQL("create table " + CrimeDbSchema.CrimeTable.NAME + "(" +
-                " _id integer primary key autoincrement, " +
-                CrimeDbSchema.CrimeTable.Cols.UUID + ", " +
-                CrimeDbSchema.CrimeTable.Cols.TITLE + ", " +
-                CrimeDbSchema.CrimeTable.Cols.DATE + ", " +
-                CrimeDbSchema.CrimeTable.Cols.SOLVED + ", " +
-                CrimeDbSchema.CrimeTable.Cols.SUSPECT +
-                        ")"
-        );
-
+        db.execSQL(DATABASE_ON_CREATE);
     }
 
     /**
@@ -48,6 +50,13 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        switch (oldVersion) {
+
+            case 1:
+                // Upgrade from version 1 to 2
+                db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
+
+        }
     }
 
     public static synchronized CrimeBaseHelper getInstance(Context context) {
