@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -119,7 +120,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
         }
 
-        mPhotoFile = CrimeLab.get(getActivity()).getPhotoFile(mCrime);
+        mPhotoFile = getPhotoFile(mCrime);
 
         mPresenter = new CrimePresenter();
         mPackageManager = getActivity().getPackageManager();
@@ -287,6 +288,63 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     }
 
+    @Override
+    public void showDateDialog(Date date) {
+        FragmentManager fragmentManager = getFragmentManager();
+        DatePickerFragment dialogDate = DatePickerFragment.newInstance(date);
+        dialogDate.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+        dialogDate.show(fragmentManager, Tags.dialogDate);
+    }
+
+    @Override
+    public void showTimeDialog(Date time) {
+        FragmentManager fragmentManager = getFragmentManager();
+        TimePickerFragment dialogTime = TimePickerFragment.newInstance(time);
+        dialogTime.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+        dialogTime.show(fragmentManager, Tags.dialogTime);
+    }
+
+    @Override
+    public void setSolved(boolean isSolved) {
+        mCrime.setSolved(isSolved);
+    }
+
+    @Override
+    public void findSuspect() {
+        final Intent pickContact = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(pickContact, REQUEST_CONTACT);
+    }
+
+    @Override
+    public void startCall() {
+
+        // Dial contact number using phone app
+        String uri = "tel:" + mSuspectNumber.trim();
+        Uri number = Uri.parse(uri);
+        Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
+
+        startActivity(callNumber);
+    }
+
+    @Override
+    public void sendCrimeReport() {
+        // Build Intent using ShareCompat.IntentBuilder
+        ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
+
+        intentBuilder.setChooserTitle(R.string.send_report)
+                .setType("text/plain")
+                .setSubject(getString(R.string.crime_report_subject))
+                .setText(getCrimeReport());
+
+        // Create chooser intent and send to OS
+        Intent intent = Intent.createChooser(
+                intentBuilder.getIntent(),
+                getString(R.string.send_report));
+
+        startActivity(intent);
+    }
+
     private void updateDate() {
         String date = formatDate(mCrime.getDate());
         btnDate.setText(date);
@@ -295,6 +353,17 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     private void updateTime() {
         String time = formatTime(mCrime.getDate());
         btnTime.setText(time);
+    }
+
+    public File getPhotoFile(Crime crime) {
+
+        // Get reference to external files directory for pictures
+        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        // Check: If there exists an external storage to save the pictures
+        if (externalFilesDir == null) return null;
+
+        return new File(externalFilesDir, crime.getPhotoFilename());
     }
 
     private void setPhoto() {
@@ -381,63 +450,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
             startActivityForResult(mCameraIntent, REQUEST_PHOTO);
         }
-    }
-
-    @Override
-    public void showDateDialog(Date date) {
-        FragmentManager fragmentManager = getFragmentManager();
-        DatePickerFragment dialogDate = DatePickerFragment.newInstance(date);
-        dialogDate.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-        dialogDate.show(fragmentManager, Tags.dialogDate);
-    }
-
-    @Override
-    public void showTimeDialog(Date time) {
-        FragmentManager fragmentManager = getFragmentManager();
-        TimePickerFragment dialogTime = TimePickerFragment.newInstance(time);
-        dialogTime.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
-        dialogTime.show(fragmentManager, Tags.dialogTime);
-    }
-
-    @Override
-    public void setSolved(boolean isSolved) {
-        mCrime.setSolved(isSolved);
-    }
-
-    @Override
-    public void findSuspect() {
-        final Intent pickContact = new Intent(Intent.ACTION_PICK,
-                ContactsContract.Contacts.CONTENT_URI);
-        startActivityForResult(pickContact, REQUEST_CONTACT);
-    }
-
-    @Override
-    public void startCall() {
-
-        // Dial contact number using phone app
-        String uri = "tel:" + mSuspectNumber.trim();
-        Uri number = Uri.parse(uri);
-        Intent callNumber = new Intent(Intent.ACTION_DIAL, number);
-
-        startActivity(callNumber);
-    }
-
-    @Override
-    public void sendCrimeReport() {
-        // Build Intent using ShareCompat.IntentBuilder
-        ShareCompat.IntentBuilder intentBuilder = ShareCompat.IntentBuilder.from(getActivity());
-
-        intentBuilder.setChooserTitle(R.string.send_report)
-                .setType("text/plain")
-                .setSubject(getString(R.string.crime_report_subject))
-                .setText(getCrimeReport());
-
-        // Create chooser intent and send to OS
-        Intent intent = Intent.createChooser(
-                intentBuilder.getIntent(),
-                getString(R.string.send_report));
-
-        startActivity(intent);
     }
 
     @OnClick(R.id.crime_photo)
