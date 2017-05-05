@@ -9,7 +9,7 @@ import java.util.Date;
 
 public interface ICrimePresenter<T> {
 
-    void deleteCrime();
+    void onDeleteCrimeButtonClicked();
 
     void updateCrime();
 

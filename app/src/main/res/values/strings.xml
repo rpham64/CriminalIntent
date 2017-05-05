@@ -40,6 +40,8 @@
     <string name="permissions_camera_must_be_granted">Camera permissions must be granted before accessing the camera.</string>
     <string name="view_photo_in_full_screen">view photo in full screen</string>
     <string name="crime_updated">Crime updated</string>
+    <string name="crime_photo_view">Crime Photo View</string>
+    <string name="camera_button">Camera Button</string>
 
     <plurals name="subtitle_plural">
         <item quantity="one">%1$s crime</item>

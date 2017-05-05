@@ -1,64 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginLeft="16dp"
-              android:layout_marginRight="16dp"
-              android:padding="10dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/vspacing_s"
+                android:layout_marginRight="@dimen/vspacing_s"
+                android:padding="@dimen/vspacing_m"
+    >
 
-    <LinearLayout
-        android:id="@+id/crime_photo_container"
+    <ImageView
+        android:id="@+id/crime_photo"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:scaleType="centerInside"
+        android:background="@android:color/darker_gray"
+        android:cropToPadding="true"
+        android:contentDescription="@string/crime_photo_view"
+        />
+
+    <ImageButton
+        android:id="@+id/crime_camera"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/crime_photo"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="@string/camera_button"
+        />
+
+    <TextView
+        android:id="@+id/crime_title_label"
+        android:text="@string/crime_title_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginRight="4dp">
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/crime_title"
+        android:layout_alignStart="@+id/crime_title"
+        android:layout_toRightOf="@id/crime_photo"
+        android:layout_toEndOf="@id/crime_photo"
+        style="?android:listSeparatorTextViewStyle"
+        />
 
-        <ImageView
-            android:id="@+id/crime_photo"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:scaleType="centerInside"
-            android:background="@android:color/darker_gray"
-            android:cropToPadding="true"/>
-
-        <ImageButton
-            android:id="@+id/crime_camera"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_camera"/>
-
-    </LinearLayout>
-
-    <!-- This initially-hidden ImageView will hold the expanded/zoomed
-    version of the first ImageButton above. Without transformations,
-    the ImageView takes up the entire screen. -->
-
-    <!-- To achieve the "zoom" animation, this view's bounds are animated
-    from the bounds of the thumbnail button above, to its final laid-out
-    bounds. -->
-
-    <LinearLayout
-        android:id="@+id/crime_title_container"
-        android:layout_width="match_parent"
+    <EditText
+        android:id="@+id/crime_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/crime_photo_container"
+        android:layout_below="@id/crime_title_label"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@id/crime_photo"
+        android:layout_toEndOf="@id/crime_photo"
         android:layout_marginLeft="@dimen/vspacing_m"
-        android:orientation="vertical"
-        >
-
-        <TextView
-            android:text="@string/crime_title_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="?android:listSeparatorTextViewStyle"/>
-
-        <EditText
-            android:id="@+id/crime_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="16dp"
-            android:hint="@string/crime_title_hint"/>
-
-    </LinearLayout>
+        android:layout_marginStart="@dimen/vspacing_m"
+        android:hint="@string/crime_title_hint"
+        android:maxLines="4"
+        />
 
 </RelativeLayout>

@@ -43,9 +43,13 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        if (oldVersion < 3) {
-            // Upgrade to version 3
-            db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
+        switch (oldVersion) {
+
+            case 1:
+                db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
+            case 2:
+                // Nothing for version 2
+
         }
     }
 

@@ -145,9 +145,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
             case (R.id.menu_item_delete_crime):
 
-                mPresenter.deleteCrime();
-                getActivity().finish();
-
+                mPresenter.onDeleteCrimeButtonClicked();
                 return true;
 
             default:
@@ -253,6 +251,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     public void deleteCrime(Crime crime) {
         CrimeLab.get(getActivity()).deleteCrime(crime);
         Toast.makeText(getActivity(), R.string.toast_crime_deleted, Toast.LENGTH_SHORT).show();
+        getActivity().finish();
     }
 
     @Override
@@ -382,7 +381,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             btnSuspectName.setEnabled(false);
         }
 
-        if (suspect != null) btnSuspectName.setText(suspect);
+        btnSuspectName.setText(suspect);
     }
 
     @Override

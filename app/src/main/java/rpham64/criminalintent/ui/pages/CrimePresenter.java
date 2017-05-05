@@ -24,7 +24,7 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
     // TODO: Figure out how to move database access away from View
 
     @Override
-    public void deleteCrime() {
+    public void onDeleteCrimeButtonClicked() {
         getView().deleteCrime(mCrime);
     }
 
