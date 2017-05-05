@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.base;
 
 /**
  * Created by Rudolf on 5/3/2017.

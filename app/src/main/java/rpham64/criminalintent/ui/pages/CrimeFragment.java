@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
@@ -43,10 +42,10 @@ import rpham64.criminalintent.BuildConfig;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
 import rpham64.criminalintent.models.database.CrimeLab;
-import rpham64.criminalintent.ui.BaseFragment;
-import rpham64.criminalintent.ui.DatePickerFragment;
-import rpham64.criminalintent.ui.TimePickerFragment;
-import rpham64.criminalintent.ui.imageView.PhotoViewActivity;
+import rpham64.criminalintent.ui.base.BaseFragment;
+import rpham64.criminalintent.ui.dialogs.DatePickerFragment;
+import rpham64.criminalintent.ui.dialogs.TimePickerFragment;
+import rpham64.criminalintent.ui.dialogs.ImagePreviewDialogFragment;
 import rpham64.criminalintent.utils.ContactUtils;
 import rpham64.criminalintent.utils.IntentUtils;
 
@@ -71,6 +70,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     interface Tags {
         String dialogDate = "CrimeFragment.dialogDate";
         String dialogTime = "CrimeFragment.dialogTime";
+        String dialogPhoto = "CrimeFragment.dialogPhoto";
     }
 
     @BindView(R.id.crime_title) EditText etxtTitle;
@@ -381,7 +381,8 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             btnSuspectName.setEnabled(false);
         }
 
-        btnSuspectName.setText(suspect);
+        String btnText = suspect != null ? suspect : getString(R.string.crime_suspect_text);
+        btnSuspectName.setText(btnText);
     }
 
     @Override
@@ -424,14 +425,10 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
 
     @OnClick(R.id.crime_photo)
     public void onPhotoClicked() {
-        if (Build.VERSION.SDK_INT < 21) {
-            Toast.makeText(getContext(), "21+ only, keep out", Toast.LENGTH_SHORT).show();
-        } else {
-            Intent intent = new Intent(getContext(), PhotoViewActivity.class);
-            ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation(getActivity(), imgPhoto, getString(R.string.view_photo_in_full_screen));
-            startActivity(intent, options.toBundle());
-        }
+        FragmentManager fragmentManager = getFragmentManager();
+        ImagePreviewDialogFragment imagePreviewFragment
+                = ImagePreviewDialogFragment.newInstance(mPresenter.getPhotoFile());
+        imagePreviewFragment.show(fragmentManager, Tags.dialogPhoto);
     }
 
     @OnClick(R.id.crime_camera)

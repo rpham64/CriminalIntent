@@ -17,7 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import icepick.State;
-import rpham64.criminalintent.ui.BaseFragment;
+import rpham64.criminalintent.ui.base.BaseFragment;
 import rpham64.criminalintent.R;
 import rpham64.criminalintent.models.Crime;
 import rpham64.criminalintent.models.database.CrimeLab;

@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;

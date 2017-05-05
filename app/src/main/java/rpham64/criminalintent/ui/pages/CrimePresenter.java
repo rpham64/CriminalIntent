@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Date;
 
 import rpham64.criminalintent.models.Crime;
-import rpham64.criminalintent.ui.BasePresenter;
+import rpham64.criminalintent.ui.base.BasePresenter;
 
 import static rpham64.criminalintent.utils.TimeUtils.formatDate;
 import static rpham64.criminalintent.utils.TimeUtils.formatTime;

@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.base;
 
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;

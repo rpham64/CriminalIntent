@@ -1,4 +1,4 @@
-package rpham64.criminalintent.ui;
+package rpham64.criminalintent.ui.base;
 
 import android.support.annotation.CallSuper;
 
