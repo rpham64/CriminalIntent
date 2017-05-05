@@ -15,7 +15,7 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
 
     private static CrimeBaseHelper sInstance;
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final String DATABASE_NAME = "crimeBase.db";
 
     private static final String DATABASE_ON_CREATE =
@@ -40,22 +40,12 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
         db.execSQL(DATABASE_ON_CREATE);
     }
 
-    /**
-     * For upgrading the database (not needed for this app)
-     *
-     * @param db
-     * @param oldVersion
-     * @param newVersion
-     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-        switch (oldVersion) {
-
-            case 1:
-                // Upgrade from version 1 to 2
-                db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
-
+        if (oldVersion < 3) {
+            // Upgrade to version 3
+            db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
         }
     }
 

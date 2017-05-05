@@ -236,6 +236,8 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
                 String number = ContactUtils.getContactNumber(getContext(), contactUri);
 
                 mPresenter.setSuspectInfo(suspect, number);
+                mPresenter.setButtonSuspect();
+                mPresenter.setCallButtonEnabled();
 
                 break;
 
