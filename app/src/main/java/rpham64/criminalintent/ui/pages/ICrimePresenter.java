@@ -7,7 +7,7 @@ import java.util.Date;
  * Created by Rudolf on 5/4/2017.
  */
 
-public interface ICrimePresenter {
+public interface ICrimePresenter<T> {
 
     void deleteCrime();
 

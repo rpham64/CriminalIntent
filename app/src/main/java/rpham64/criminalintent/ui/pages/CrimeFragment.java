@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -144,14 +143,11 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
-            // Case: MenuItem is "Delete"
             case (R.id.menu_item_delete_crime):
 
-                // Remove crime from CrimeLab
                 mPresenter.deleteCrime();
-                Toast.makeText(getActivity(), R.string.toast_crime_deleted, Toast.LENGTH_SHORT).show();
-
                 getActivity().finish();
+
                 return true;
 
             default:
@@ -254,6 +250,7 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     @Override
     public void deleteCrime(Crime crime) {
         CrimeLab.get(getActivity()).deleteCrime(crime);
+        Toast.makeText(getActivity(), R.string.toast_crime_deleted, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -262,26 +259,13 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     }
 
     @Override
-    public void getPhotoFile(String photoFileName) {
-        // Get reference to external files directory for pictures
-        File externalFilesDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        // Check: If there exists an external storage to save the pictures
-        if (externalFilesDir == null) return;
-
-        mPresenter.setPhotoFile(new File(externalFilesDir, photoFileName));
-    }
-
-    @Override
     public void setPhoto(File photo) {
-        if (photo != null) {
-            Picasso.with(getActivity())
-                    .load(photo)
-                    .fit()
-                    .centerCrop()
-                    .placeholder(null)
-                    .into(imgPhoto);
-        }
+        Picasso.with(getActivity())
+                .load(photo)
+                .fit()
+                .centerCrop()
+                .placeholder(null)
+                .into(imgPhoto);
     }
 
     @Override
@@ -307,28 +291,26 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     @Override
     public void startCamera() {
 
-        // TODO: Fix this hack
-        File photoFile = CrimeLab.get(getActivity()).getPhotoFile(getActivity(), mPresenter.getPhotoFileName());
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photoFile = mPresenter.getPhotoFile();
 
-        boolean canTakePhoto = photoFile != null
-                && cameraIntent.resolveActivity(getActivity().getPackageManager()) != null;
+        // Invalidate cache for old image (overwriting)
+        Picasso.with(getActivity()).invalidate(photoFile);
+
+        final Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        boolean canTakePhoto = photoFile != null &&
+                cameraIntent.resolveActivity(getActivity().getPackageManager()) != null;
 
         if (canTakePhoto) {
 
             Uri uri;
 
-            // Android api level 24 (Nougat) requires FileProvider for creating a Uri
+            // Android api level 24+ (Nougat) requires FileProvider for creating a Uri
             // For levels 23 and below, use Uri.fromFile
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 uri = FileProvider.getUriForFile(getContext(), AUTHORITY, photoFile);
             } else {
                 uri = Uri.fromFile(photoFile);
-            }
-
-            // For api levels 21 and up (lollipop+)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);

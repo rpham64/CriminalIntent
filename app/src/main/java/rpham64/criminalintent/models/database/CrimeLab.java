@@ -106,7 +106,6 @@ public class CrimeLab {
     /**
      * Finds the directory for storing pictures
      *
-     * @param crime
      * @return File object that points to the right location
      */
     public File getPhotoFile(Context context, String fileName) {

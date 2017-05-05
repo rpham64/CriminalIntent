@@ -13,7 +13,7 @@ import static rpham64.criminalintent.utils.TimeUtils.formatTime;
  * Created by Rudolf on 5/3/2017.
  */
 
-public class CrimePresenter extends BasePresenter<CrimePresenter.View> implements ICrimePresenter{
+public class CrimePresenter extends BasePresenter<CrimePresenter.View> implements ICrimePresenter {
 
     private Crime mCrime;
 
@@ -96,9 +96,6 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
     public void setSuspectInfo(String suspect, String number) {
         mCrime.setSuspect(suspect);
         mCrime.setNumber(number);
-
-        setButtonSuspect();
-        setCallButtonEnabled();
     }
 
     @Override
@@ -166,10 +163,9 @@ public class CrimePresenter extends BasePresenter<CrimePresenter.View> implement
     public interface View {
         void deleteCrime(Crime crime);
         void updateCrime(Crime crime);
-        void getPhotoFile(String photoFileName);
-        void setPhoto(File photo);
         void updateEditTextTitle(String title);
         void startCamera();
+        void setPhoto(File photo);
         void updateButtonDate(String date);
         void updateButtonTime(String time);
         void showDateDialog(Date date);

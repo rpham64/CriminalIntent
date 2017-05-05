@@ -13,6 +13,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class CrimeBaseHelper extends SQLiteOpenHelper {
 
+    private static CrimeBaseHelper sInstance;
+
     private static final int VERSION = 2;
     private static final String DATABASE_NAME = "crimeBase.db";
 
@@ -27,9 +29,7 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
             ")";
 
     private static final String DATABASE_ADD_COLUMN_NUMBER = "ALTER TABLE " + CrimeDbSchema.CrimeTable.NAME
-            + " ADD COLUMN " + CrimeDbSchema.CrimeTable.Cols.NUMBER + " TEXT;";
-
-    private static CrimeBaseHelper sInstance;
+            + " ADD COLUMN " + CrimeDbSchema.CrimeTable.Cols.NUMBER + " string;";
 
     private CrimeBaseHelper(Context context) {
         super(context, DATABASE_NAME, null, VERSION);
