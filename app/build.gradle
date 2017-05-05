@@ -5,10 +5,10 @@ apply plugin: 'com.neenbedankt.android-apt'
 android {
     signingConfigs {
         release {
-            keyAlias 'rpham64'
-            keyPassword 'trekon123'
+            keyAlias KEY_ALIAS
+            keyPassword KEY_PASSWORD
             storeFile file('C:/Users/Rudolf/Keystores/criminal_intent.jks')
-            storePassword 'trekon123'
+            storePassword KEYSTORE_PASSWORD
         }
     }
     compileSdkVersion 25
@@ -23,6 +23,7 @@ android {
     }
     buildTypes {
         release {
+            debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
@@ -38,7 +39,7 @@ android {
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.3.0'

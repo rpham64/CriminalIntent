@@ -6,3 +6,7 @@
 .DS_Store
 /build
 /captures
+/gradle.properties
+app/src/main/java/rpham64/criminalintent/network/
+app/src/main/res/drawable-nodpi/
+/app/app-release.apk

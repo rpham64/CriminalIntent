@@ -1,6 +1,7 @@
 package rpham64.criminalintent.models.database;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -15,7 +16,7 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
 
     private static CrimeBaseHelper sInstance;
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 5;
     private static final String DATABASE_NAME = "crimeBase.db";
 
     private static final String DATABASE_ON_CREATE =
@@ -25,7 +26,8 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
             CrimeDbSchema.CrimeTable.Cols.TITLE + ", " +
             CrimeDbSchema.CrimeTable.Cols.DATE + ", " +
             CrimeDbSchema.CrimeTable.Cols.SOLVED + ", " +
-            CrimeDbSchema.CrimeTable.Cols.SUSPECT +
+            CrimeDbSchema.CrimeTable.Cols.SUSPECT + ", " +
+            CrimeDbSchema.CrimeTable.Cols.NUMBER +
             ")";
 
     private static final String DATABASE_ADD_COLUMN_NUMBER = "ALTER TABLE " + CrimeDbSchema.CrimeTable.NAME
@@ -43,12 +45,19 @@ public class CrimeBaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        // Create cursor for all data
+        Cursor cursor = db.rawQuery("SELECT * FROM " + CrimeDbSchema.CrimeTable.NAME, null);
+        int numberColumnIndex = cursor.getColumnIndex(CrimeDbSchema.CrimeTable.Cols.NUMBER);
+
         switch (oldVersion) {
 
             case 1:
-                db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
+                if (numberColumnIndex < 0) {   // Missing column "number", so add to table
+                    db.execSQL(DATABASE_ADD_COLUMN_NUMBER);
+                }
             case 2:
-                // Nothing for version 2
+            case 3:
+            case 4:
 
         }
     }
