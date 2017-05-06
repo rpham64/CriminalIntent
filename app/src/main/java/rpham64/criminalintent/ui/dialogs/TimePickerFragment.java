@@ -63,6 +63,8 @@ public class TimePickerFragment extends DialogFragment implements TimePicker.OnT
 
         mCalendar.setTime(time);
 
+        mTimePicker.setIs24HourView(true);
+
         mTimePicker.setCurrentHour(mCalendar.get(Calendar.HOUR_OF_DAY));
         mTimePicker.setCurrentMinute(mCalendar.get(Calendar.MINUTE));
 

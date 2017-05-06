@@ -263,8 +263,6 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
     public void setPhoto(File photo) {
         Picasso.with(getActivity())
                 .load(photo)
-                .fit()
-                .centerCrop()
                 .placeholder(null)
                 .into(imgPhoto);
     }
@@ -315,6 +313,10 @@ public class CrimeFragment extends BaseFragment implements TextWatcher, CrimePre
             }
 
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
 
             startActivityForResult(cameraIntent, REQUEST_PHOTO);
         }
