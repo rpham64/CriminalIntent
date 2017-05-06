@@ -2,13 +2,17 @@ apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.neenbedankt.android-apt'
 
+def store_password = project.hasProperty('KEYSTORE_PASSWORD') ? KEYSTORE_PASSWORD : ""
+def key_alias = project.hasProperty('KEY_ALIAS') ? KEY_ALIAS : ""
+def key_password = project.hasProperty('KEY_PASSWORD') ? KEY_PASSWORD : ""
+
 android {
     signingConfigs {
         release {
-            keyAlias KEY_ALIAS
-            keyPassword KEY_PASSWORD
+            keyAlias key_alias
+            keyPassword key_password
             storeFile file('C:/Users/Rudolf/Keystores/criminal_intent.jks')
-            storePassword KEYSTORE_PASSWORD
+            storePassword store_password
         }
     }
     compileSdkVersion 25
@@ -23,7 +27,7 @@ android {
     }
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
