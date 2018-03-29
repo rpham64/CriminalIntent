@@ -38,10 +38,11 @@ android {
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
         // replace with the current version of the Android plugin
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.1.0'
     }
 }
 
